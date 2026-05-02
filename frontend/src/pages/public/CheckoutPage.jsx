@@ -1,41 +1,62 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, CheckCircle, AlertCircle, User, Mail, Phone, FileImage } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, User, Mail, Phone, FileImage, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navbar from '../../components/common/Navbar'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../utils/api'
 
+const PAYMENT_METHODS = [
+  {
+    value: 'masrivi',
+    label: 'Masrivi',
+    number: '+222 42212334',
+    color: '#00A651',
+    desc: 'Envoyez le montant sur ce numéro Masrivi puis uploadez le reçu'
+  },
+  {
+    value: 'bankily',
+    label: 'Bankily',
+    number: '+222 22212334',
+    color: '#F7A800',
+    desc: 'Envoyez le montant sur ce numéro Bankily puis uploadez le reçu'
+  },
+  {
+    value: 'virement',
+    label: 'Virement bancaire',
+    number: null,
+    color: '#378ADD',
+    desc: 'Contactez-nous pour les détails du virement'
+  }
+]
+
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', paymentMethod: 'virement', notes: '' })
+  const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', paymentMethod: 'masrivi', notes: '' })
   const [proofFile, setProofFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [orderId, setOrderId] = useState(null)
   const [orderNumber, setOrderNumber] = useState(null)
 
-  if (cart.length === 0 && step === 1) {
-    navigate('/panier')
-    return null
-  }
+  if (cart.length === 0 && step === 1) { navigate('/panier'); return null }
 
-  // Group items by event
   const byEvent = cart.reduce((acc, item) => {
     if (!acc[item.eventId]) acc[item.eventId] = { eventId: item.eventId, eventTitle: item.eventTitle, items: [] }
     acc[item.eventId].items.push(item)
     return acc
   }, {})
 
+  const selectedMethod = PAYMENT_METHODS.find(m => m.value === form.paymentMethod)
+
   const handleOrder = async () => {
     if (!form.name || !form.email || !form.phone) { toast.error('Remplissez tous les champs'); return }
     const events = Object.values(byEvent)
     if (events.length > 1) { toast.error('Un seul événement par commande svp'); return }
-
     setLoading(true)
     try {
       const { data } = await api.post('/orders', {
@@ -62,7 +83,7 @@ export default function CheckoutPage() {
       clearCart()
       setStep(3)
       toast.success('Preuve de paiement envoyée !')
-    } catch { toast.error('Erreur lors de l\'envoi') }
+    } catch { toast.error("Erreur lors de l'envoi") }
     finally { setLoading(false) }
   }
 
@@ -70,7 +91,6 @@ export default function CheckoutPage() {
     <div className="min-h-screen">
       <Navbar />
       <div className="pt-24 max-w-2xl mx-auto px-4 pb-16">
-        {/* Steps */}
         <div className="flex items-center gap-4 mb-10">
           {[1, 2, 3].map(s => (
             <div key={s} className="flex items-center gap-2 flex-1">
@@ -80,9 +100,8 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {/* Step 1 - Infos + Commande */}
         {step === 1 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6">
             <h1 className="font-display font-bold text-3xl text-desert-50">Vos informations</h1>
             <div className="card p-6 space-y-4">
               <div>
@@ -106,21 +125,42 @@ export default function CheckoutPage() {
                   <input className="input pl-10" placeholder="+222 XX XX XX XX" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
                 </div>
               </div>
+
               <div>
-                <label className="text-desert-300 text-sm font-medium block mb-1.5">Mode de paiement</label>
-                <select className="input" value={form.paymentMethod} onChange={e => setForm({...form, paymentMethod: e.target.value})}>
-                  <option value="virement">Virement bancaire</option>
-                  <option value="mobile_money">Mobile Money</option>
-                  <option value="cash">Espèces</option>
-                </select>
+                <label className="text-desert-300 text-sm font-medium block mb-2">Mode de paiement</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {PAYMENT_METHODS.map(m => (
+                    <button key={m.value} type="button"
+                      onClick={() => setForm({...form, paymentMethod: m.value})}
+                      className={`p-3 rounded-xl border-2 text-center transition-all ${form.paymentMethod === m.value ? 'border-sahara-400 bg-sahara-400/10' : 'border-night-700 bg-night-800 hover:border-night-600'}`}>
+                      <div className="w-6 h-6 rounded-full mx-auto mb-1" style={{background: m.color}} />
+                      <p className="text-xs font-bold text-desert-200">{m.label}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {selectedMethod && (
+                  <div className="mt-3 p-4 rounded-xl border border-night-700 bg-night-800/50">
+                    <p className="text-desert-400 text-sm">{selectedMethod.desc}</p>
+                    {selectedMethod.number && (
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="font-mono font-bold text-sahara-400 text-lg">{selectedMethod.number}</p>
+                        <button onClick={() => { navigator.clipboard.writeText(selectedMethod.number); toast.success('Numéro copié !') }}
+                          className="flex items-center gap-1 text-xs text-desert-500 hover:text-desert-300 transition-colors">
+                          <Copy className="w-3 h-3" /> Copier
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
+
               <div>
                 <label className="text-desert-300 text-sm font-medium block mb-1.5">Notes (optionnel)</label>
                 <textarea className="input resize-none" rows={2} placeholder="Remarques..." value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
               </div>
             </div>
 
-            {/* Summary */}
             <div className="card p-5">
               <h3 className="font-semibold text-desert-200 mb-3">Récapitulatif</h3>
               {cart.map(item => (
@@ -141,9 +181,8 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Step 2 - Upload preuve */}
         {step === 2 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6">
             <div className="text-center">
               <CheckCircle className="w-14 h-14 text-sahara-400 mx-auto mb-4" />
               <h1 className="font-display font-bold text-3xl text-desert-50 mb-2">Commande créée !</h1>
@@ -151,13 +190,27 @@ export default function CheckoutPage() {
             </div>
 
             <div className="card p-6 border border-sahara-400/30">
-              <div className="flex items-start gap-3 mb-5">
+              <div className="flex items-start gap-3 mb-4">
                 <AlertCircle className="w-5 h-5 text-sahara-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-desert-200 font-semibold">Envoyez le paiement puis uploadez votre reçu</p>
-                  <p className="text-desert-400 text-sm mt-1">Total à payer : <span className="text-sahara-400 font-bold">{total.toLocaleString()} MRU</span></p>
+                  <p className="text-desert-400 text-sm mt-1">Total : <span className="text-sahara-400 font-bold">{total.toLocaleString()} MRU</span></p>
                 </div>
               </div>
+
+              {selectedMethod?.number && (
+                <div className="p-4 rounded-xl mb-4" style={{background: selectedMethod.color + '15', border: `1px solid ${selectedMethod.color}40`}}>
+                  <p className="text-sm font-bold mb-1" style={{color: selectedMethod.color}}>{selectedMethod.label}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-mono font-bold text-desert-100 text-xl">{selectedMethod.number}</p>
+                    <button onClick={() => { navigator.clipboard.writeText(selectedMethod.number); toast.success('Numéro copié !') }}
+                      className="flex items-center gap-1 text-xs text-desert-400 hover:text-desert-200 transition-colors">
+                      <Copy className="w-3 h-3" /> Copier
+                    </button>
+                  </div>
+                  <p className="text-desert-400 text-xs mt-2">Envoyez exactement <span className="text-sahara-400 font-bold">{total.toLocaleString()} MRU</span> sur ce numéro</p>
+                </div>
+              )}
 
               <div className="border-2 border-dashed border-night-600 rounded-xl p-8 text-center hover:border-sahara-400/50 transition-colors cursor-pointer"
                 onClick={() => document.getElementById('proof-input').click()}>
@@ -184,14 +237,13 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Step 3 - Succès */}
         {step === 3 && (
-          <div className="text-center py-10 animate-fade-in space-y-6">
+          <div className="text-center py-10 space-y-6">
             <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle className="w-14 h-14 text-green-400" />
             </div>
             <div>
-              <h1 className="font-display font-black text-4xl text-desert-50 mb-3">Parfait ! 🎉</h1>
+              <h1 className="font-display font-black text-4xl text-desert-50 mb-3">Parfait !</h1>
               <p className="text-desert-300 text-lg mb-2">Votre reçu a bien été envoyé à l'organisateur.</p>
               <p className="text-desert-400">Vous recevrez vos <span className="text-sahara-400 font-semibold">tickets QR Code</span> dès validation du paiement.</p>
             </div>

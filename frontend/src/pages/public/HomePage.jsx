@@ -55,9 +55,6 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           {/* Flag colors accent */}
           <div className="flex justify-center gap-1 mb-8">
-            <div className="h-1 w-12 rounded-full bg-mauritanie-green" />
-            <div className="h-1 w-12 rounded-full bg-mauritanie-yellow" />
-            <div className="h-1 w-12 rounded-full bg-mauritanie-red" />
           </div>
 
           <h1 className="font-display font-black text-5xl md:text-7xl leading-tight mb-6">
