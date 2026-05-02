@@ -8,7 +8,7 @@ const app = express();
 // ─── Middleware ────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   'http://localhost:5173',
-  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : []),
 ].filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '50mb' }));
