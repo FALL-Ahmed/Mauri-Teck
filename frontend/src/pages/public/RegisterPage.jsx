@@ -16,7 +16,7 @@ export default function RegisterPage() {
     if (form.password.length < 6) { setError('Le mot de passe doit avoir au moins 6 caractères'); return }
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, password: form.password })
