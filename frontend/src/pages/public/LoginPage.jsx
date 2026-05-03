@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Eye, EyeOff, Ticket, AlertCircle } from 'lucide-react'
 
@@ -10,6 +10,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,7 +19,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const user = await login(form.email, form.password)
-      if (user.role === 'ADMIN') navigate('/admin')
+      if (redirect) navigate(redirect)
+      else if (user.role === 'ADMIN') navigate('/admin')
       else if (user.role === 'ORGANIZER') navigate('/organisateur')
       else if (user.role === 'AGENT') navigate('/agent')
       else navigate('/mes-tickets')

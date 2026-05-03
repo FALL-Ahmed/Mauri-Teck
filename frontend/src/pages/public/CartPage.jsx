@@ -1,12 +1,20 @@
-import { Link } from 'react-router-dom'
-import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, LogIn } from 'lucide-react'
 import Navbar from '../../components/common/Navbar'
 import { useCart } from '../../context/CartContext'
+import { useAuth } from '../../context/AuthContext'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, total, clearCart } = useCart()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  const handleCheckout = () => {
+    if (!user) { navigate('/login?redirect=/checkout'); return }
+    navigate('/checkout')
+  }
 
   if (cart.length === 0) return (
     <div className="min-h-screen">
@@ -92,9 +100,9 @@ export default function CartPage() {
                   <span className="font-display text-xl text-sahara-400">{total.toLocaleString()} MRU</span>
                 </div>
               </div>
-              <Link to="/checkout" className="btn-gold w-full text-center py-3 flex items-center justify-center gap-2 rounded-xl">
-                Commander <ArrowRight className="w-4 h-4" />
-              </Link>
+              <button onClick={handleCheckout} className="btn-gold w-full text-center py-3 flex items-center justify-center gap-2 rounded-xl">
+                {user ? <><ArrowRight className="w-4 h-4" /> Commander</> : <><LogIn className="w-4 h-4" /> Se connecter pour commander</>}
+              </button>
             </div>
             <div className="card p-4 text-center text-desert-500 text-sm">
               🔒 Paiement validé par l'organisateur · QR Code envoyé après confirmation
