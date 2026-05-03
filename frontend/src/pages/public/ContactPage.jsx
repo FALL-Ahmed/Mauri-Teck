@@ -61,7 +61,7 @@ export default function ContactPage() {
 
         <div className="mt-8 card p-6 text-center border border-sahara-400/20">
           <p className="text-desert-400 text-sm mb-1">Réalisé par</p>
-          <a href="https://africaiaconsulting.netlify.app" target="_blank" rel="noreferrer"
+          <a href="https://africa-ia-consulting.com" target="_blank" rel="noreferrer"
             className="font-bold text-sahara-400 hover:text-sahara-300 transition-colors text-lg flex items-center justify-center gap-2">
             AfriacaIAConsulting <ExternalLink className="w-4 h-4" />
           </a>

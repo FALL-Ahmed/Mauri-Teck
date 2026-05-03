@@ -102,7 +102,7 @@ export default function Navbar() {
       <div className="bg-night-900/80 border-t border-night-800 py-1 text-center">
         <p className="text-xs text-desert-600">
           Réalisé par{' '}
-          <a href="https://africaiaconsulting.netlify.app" target="_blank" rel="noreferrer"
+          <a href="https://africa-ia-consulting.com" target="_blank" rel="noreferrer"
             className="text-sahara-400/70 hover:text-sahara-400 transition-colors font-medium">
             AfriacaIAConsulting
           </a>
