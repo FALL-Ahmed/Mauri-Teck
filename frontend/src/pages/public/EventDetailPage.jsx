@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Calendar, MapPin, Clock, Users, Minus, Plus, ShoppingCart, ArrowLeft } from 'lucide-react'
+import { Calendar, MapPin, Clock, Users, Minus, Plus, ShoppingCart, ArrowLeft, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navbar from '../../components/common/Navbar'
 import { useCart } from '../../context/CartContext'
@@ -46,7 +46,15 @@ export default function EventDetailPage() {
   if (!event) return null
 
   const eventDate = new Date(event.date)
+  const now = new Date()
+  const isEventPassed = now > eventDate  // ← vérification date
+
   const imgSrc = event.image ? (event.image.startsWith('http') ? event.image : `${BASE}${event.image}`) : null
+
+  // Calcul du temps restant
+  const diff = eventDate - now
+  const daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hoursLeft = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
 
   return (
     <div className="min-h-screen bg-[#080808] text-white">
@@ -60,20 +68,38 @@ export default function EventDetailPage() {
           Retour aux événements
         </button>
 
+        {/* Bannière événement terminé */}
+        {isEventPassed && (
+          <div className="mb-6 flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-red-400">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <div>
+              <p className="font-bold">Cet événement est terminé</p>
+              <p className="text-sm text-red-400/70">La vente de tickets est clôturée depuis le {eventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} à {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* ── COLONNE GAUCHE ── */}
           <div className="lg:col-span-2 space-y-6">
 
-            {/* IMAGE GRANDE ET CLAIRE */}
-            <div className="rounded-3xl overflow-hidden bg-[#111] border border-white/10">
+            {/* IMAGE */}
+            <div className="rounded-3xl overflow-hidden bg-[#111] border border-white/10 relative">
               {imgSrc ? (
-                <img src={imgSrc} alt={event.title}
-                  className="w-full h-72 sm:h-96 object-cover" />
+                <img src={imgSrc} alt={event.title} className="w-full h-72 sm:h-96 object-cover" />
               ) : (
                 <div className="w-full h-72 sm:h-96 flex items-center justify-center"
                   style={{ background: `linear-gradient(135deg, ${event.category?.color || '#D4A853'}22, #111)` }}>
                   <span className="text-9xl">{event.category?.icon || '🎫'}</span>
+                </div>
+              )}
+              {/* Overlay si terminé */}
+              {isEventPassed && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <div className="bg-red-500/90 text-white font-black text-2xl px-8 py-4 rounded-2xl rotate-[-5deg]">
+                    TERMINÉ
+                  </div>
                 </div>
               )}
             </div>
@@ -85,6 +111,11 @@ export default function EventDetailPage() {
                   style={{ background: `${event.category?.color || '#D4A853'}20`, color: event.category?.color || '#D4A853', borderColor: `${event.category?.color || '#D4A853'}40` }}>
                   {event.category?.icon} {event.category?.name}
                 </span>
+                {!isEventPassed && daysLeft >= 0 && (
+                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-sahara-500/20 border border-sahara-500/30 text-sahara-400">
+                    ⏰ {daysLeft > 0 ? `J-${daysLeft}` : hoursLeft > 0 ? `H-${hoursLeft}` : 'Aujourd\'hui !'}
+                  </span>
+                )}
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white mb-4">{event.title}</h1>
 
@@ -153,61 +184,83 @@ export default function EventDetailPage() {
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <div className="bg-[#111] border border-white/10 rounded-3xl p-6">
-                <h2 className="text-xl font-black text-white mb-5">Choisir vos tickets</h2>
 
-                <div className="space-y-4">
-                  {event.ticketTypes?.map(tt => (
-                    <div key={tt.id} className="border border-white/10 rounded-2xl p-4 hover:border-sahara-500/40 transition-all"
-                      style={{ borderLeftColor: tt.color || '#D4A853', borderLeftWidth: '3px' }}>
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-bold text-white">{tt.name}</h3>
-                          {tt.description && <p className="text-xs text-gray-400 mt-0.5">{tt.description}</p>}
-                        </div>
-                        <div className="text-right shrink-0 ml-3">
-                          <div className="text-xl font-black text-sahara-400">
-                            {tt.price === 0 ? 'Gratuit' : `${tt.price.toLocaleString()}`}
-                          </div>
-                          {tt.price > 0 && <div className="text-xs text-gray-500">MRU</div>}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
-                        <Users className="w-3.5 h-3.5" />
-                        {tt.availableSeats} places restantes
-                      </div>
-
-                      {tt.availableSeats > 0 ? (
-                        <>
-                          <div className="flex items-center justify-between mb-3">
-                            <button onClick={() => setQty(tt.id, (quantities[tt.id] || 0) - 1)}
-                              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                              <Minus className="w-4 h-4" />
-                            </button>
-                            <span className="text-xl font-black text-white w-12 text-center">{quantities[tt.id] || 0}</span>
-                            <button onClick={() => setQty(tt.id, (quantities[tt.id] || 0) + 1)}
-                              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                          <button onClick={() => handleAddToCart(tt)}
-                            disabled={!quantities[tt.id]}
-                            className="w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white"
-                            style={{ background: quantities[tt.id] ? 'linear-gradient(135deg, #D4A853, #b8882a)' : '#333' }}>
-                            <ShoppingCart className="w-4 h-4" />
-                            Ajouter au panier
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-center py-2 text-red-400 font-bold text-sm">Complet</div>
-                      )}
+                {/* Si événement terminé */}
+                {isEventPassed ? (
+                  <div className="text-center py-6">
+                    <div className="text-5xl mb-4">🔒</div>
+                    <h2 className="text-xl font-black text-white mb-2">Vente clôturée</h2>
+                    <p className="text-gray-400 text-sm">
+                      La vente de tickets pour cet événement est terminée depuis le<br/>
+                      <span className="text-red-400 font-bold">
+                        {eventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} à {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </p>
+                    <div className="mt-6 border-t border-white/10 pt-6">
+                      <p className="text-xs text-gray-500">Consultez nos autres événements disponibles</p>
+                      <button onClick={() => navigate('/')}
+                        className="mt-3 w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold text-gray-300 transition-all">
+                        Voir les événements →
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-xl font-black text-white mb-5">Choisir vos tickets</h2>
+                    <div className="space-y-4">
+                      {event.ticketTypes?.map(tt => (
+                        <div key={tt.id} className="border border-white/10 rounded-2xl p-4 hover:border-sahara-500/40 transition-all"
+                          style={{ borderLeftColor: tt.color || '#D4A853', borderLeftWidth: '3px' }}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h3 className="font-bold text-white">{tt.name}</h3>
+                              {tt.description && <p className="text-xs text-gray-400 mt-0.5">{tt.description}</p>}
+                            </div>
+                            <div className="text-right shrink-0 ml-3">
+                              <div className="text-xl font-black text-sahara-400">
+                                {tt.price === 0 ? 'Gratuit' : `${tt.price.toLocaleString()}`}
+                              </div>
+                              {tt.price > 0 && <div className="text-xs text-gray-500">MRU</div>}
+                            </div>
+                          </div>
 
-                <p className="text-xs text-gray-600 text-center mt-4">
-                  Paiement via Masrivi ou Bankily après commande
-                </p>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
+                            <Users className="w-3.5 h-3.5" />
+                            {tt.availableSeats} places restantes
+                          </div>
+
+                          {tt.availableSeats > 0 ? (
+                            <>
+                              <div className="flex items-center justify-between mb-3">
+                                <button onClick={() => setQty(tt.id, (quantities[tt.id] || 0) - 1)}
+                                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="text-xl font-black text-white w-12 text-center">{quantities[tt.id] || 0}</span>
+                                <button onClick={() => setQty(tt.id, (quantities[tt.id] || 0) + 1)}
+                                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <button onClick={() => handleAddToCart(tt)}
+                                disabled={!quantities[tt.id]}
+                                className="w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white"
+                                style={{ background: quantities[tt.id] ? 'linear-gradient(135deg, #D4A853, #b8882a)' : '#333' }}>
+                                <ShoppingCart className="w-4 h-4" />
+                                Ajouter au panier
+                              </button>
+                            </>
+                          ) : (
+                            <div className="text-center py-2 text-red-400 font-bold text-sm">Complet</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-600 text-center mt-4">
+                      Paiement via Masrivi ou Bankily après commande
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>

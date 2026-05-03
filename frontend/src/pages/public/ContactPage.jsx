@@ -19,7 +19,7 @@ export default function ContactPage() {
             </div>
             <div className="flex-1">
               <p className="font-bold text-desert-100">WhatsApp</p>
-              <p className="text-desert-400 text-sm">+222 49 37 78 34</p>
+              <p className="text-desert-400 text-sm">+222 41 51 32 11</p>
             </div>
             <ExternalLink className="w-4 h-4 text-desert-600 group-hover:text-desert-400 transition-colors" />
           </a>
@@ -31,7 +31,7 @@ export default function ContactPage() {
             </div>
             <div className="flex-1">
               <p className="font-bold text-desert-100">Téléphone</p>
-              <p className="text-desert-400 text-sm">+222 42 21 23 38</p>
+              <p className="text-desert-400 text-sm">+222 48 32 15 99</p>
             </div>
             <ExternalLink className="w-4 h-4 text-desert-600 group-hover:text-desert-400 transition-colors" />
           </a>

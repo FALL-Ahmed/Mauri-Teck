@@ -191,7 +191,7 @@ export default function HomePage() {
       <footer className="py-12 border-t border-night-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="font-display font-bold text-2xl text-gradient mb-2">Mauri-Ticket</div>
-          <p className="text-desert-500 text-sm">© 2024 Mauri-Ticket · Mauritanie 🇲🇷</p>
+          <p className="text-desert-500 text-sm">© 2026 Mauri-Ticket · Mauritanie 🇲🇷</p>
         </div>
       </footer>
     </div>
