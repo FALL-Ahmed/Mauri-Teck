@@ -1,20 +1,17 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('cloudinary').v2;
+const path = require('path');
+const fs = require('fs');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const storage = (folder) => new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: `mauri-ticket/${folder}`,
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+const createStorage = (folder) => multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, `../../uploads/${folder}`);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
   },
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}${path.extname(file.originalname)}`);
+  }
 });
 
 const imageFilter = (req, file, cb) => {
@@ -22,6 +19,6 @@ const imageFilter = (req, file, cb) => {
   else cb(new Error('Images uniquement (jpg, png, webp, gif)'));
 };
 
-exports.uploadEventImage   = multer({ storage: storage('events'),   fileFilter: imageFilter, limits: { fileSize: 5e6 } }).single('image');
-exports.uploadPaymentProof = multer({ storage: storage('receipts'), fileFilter: imageFilter, limits: { fileSize: 5e6 } }).single('paymentProof');
-exports.uploadLogo         = multer({ storage: storage('logos'),    fileFilter: imageFilter, limits: { fileSize: 2e6 } }).single('logo');
+exports.uploadEventImage   = multer({ storage: createStorage('events'),   fileFilter: imageFilter, limits: { fileSize: 5e6 } }).single('image');
+exports.uploadPaymentProof = multer({ storage: createStorage('receipts'), fileFilter: imageFilter, limits: { fileSize: 5e6 } }).single('paymentProof');
+exports.uploadLogo         = multer({ storage: createStorage('logos'),    fileFilter: imageFilter, limits: { fileSize: 2e6 } }).single('logo');
