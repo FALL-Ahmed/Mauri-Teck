@@ -1,103 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const QRCode = require('qrcode');
 const { v4: uuid } = require('uuid');
-const nodemailer = require('nodemailer');
 const prisma = new PrismaClient();
-
-// ── MAILER ────────────────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  socketOptions: { family: 4 },
-  auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS }
-});
-
-const sendTicketEmail = async (order, tickets) => {
-  const email = order.guestEmail || order.user?.email;
-  const name  = order.guestName  || order.user?.name || 'Cher client';
-  if (!email) return;
-
-  const eventDate = new Date(order.event.date).toLocaleDateString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
-
-  // Générer les QR codes en buffer PNG pour les pièces jointes
-  const attachments = [];
-  const ticketsHTML = tickets.map((t, i) => {
-    const cid = `qr_${t.ticketNumber}@mauti`;
-    // Extraire le buffer base64 du dataURL
-    const base64Data = t.qrCode.replace(/^data:image\/png;base64,/, '');
-    attachments.push({
-      filename: `ticket-${i + 1}-${t.ticketNumber}.png`,
-      content: base64Data,
-      encoding: 'base64',
-      cid: cid  // Content-ID pour référencer dans le HTML
-    });
-
-    return `
-    <div style="background:#1a0a00;border:2px solid #D4A853;border-radius:16px;padding:24px;margin:16px 0;text-align:center;">
-      <div style="font-size:13px;color:#D4A853;font-weight:bold;letter-spacing:2px;margin-bottom:8px;">🎟️ TICKET ${i + 1}</div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:8px;">Numéro de ticket</div>
-      <div style="font-size:13px;color:#fff;font-family:monospace;font-weight:bold;margin-bottom:16px;background:#000;padding:8px;border-radius:8px;">${t.ticketNumber}</div>
-      <img src="cid:${cid}" width="220" height="220" style="background:white;padding:10px;border-radius:12px;display:block;margin:0 auto;" />
-      <div style="font-size:12px;color:#D4A853;margin-top:12px;font-weight:bold;">Présentez ce QR code à l'entrée</div>
-      <div style="font-size:11px;color:#666;margin-top:4px;">⚠️ Usage unique — ne pas partager</div>
-    </div>
-  `}).join('');
-
-  const html = `
-    <!DOCTYPE html><html><head><meta charset="utf-8"></head>
-    <body style="margin:0;padding:0;background:#f5f5f5;font-family:'Segoe UI',Arial,sans-serif;">
-      <div style="max-width:600px;margin:0 auto;padding:32px 16px;">
-
-        <div style="text-align:center;margin-bottom:24px;">
-          <div style="background:linear-gradient(135deg,#D4A853,#b8882a);display:inline-block;padding:16px 40px;border-radius:16px;">
-            <div style="font-size:26px;font-weight:900;color:white;letter-spacing:2px;">🎫 MAUTI-TICKET</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.8);letter-spacing:3px;margin-top:2px;">MAURITANIE</div>
-          </div>
-        </div>
-
-        <div style="background:white;border-radius:20px;padding:32px;margin-bottom:16px;box-shadow:0 2px 20px rgba(0,0,0,0.1);">
-          <div style="text-align:center;margin-bottom:24px;">
-            <div style="font-size:48px;">✅</div>
-            <h1 style="color:#1a1a1a;font-size:22px;margin:8px 0 4px;">Commande confirmée !</h1>
-            <p style="color:#666;font-size:15px;margin:0;">Bonjour <strong>${name}</strong>, votre paiement a été validé.</p>
-          </div>
-
-          <div style="background:#f9f6f0;border:1px solid #D4A853;border-radius:12px;padding:20px;margin-bottom:24px;">
-            <h2 style="color:#D4A853;font-size:16px;margin:0 0 14px;">📅 Détails de l'événement</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:14px;">
-              <tr><td style="color:#888;padding:5px 0;width:130px;">Événement</td><td style="color:#1a1a1a;font-weight:bold;">${order.event.title}</td></tr>
-              <tr><td style="color:#888;padding:5px 0;">Date</td><td style="color:#1a1a1a;">${eventDate}</td></tr>
-              <tr><td style="color:#888;padding:5px 0;">Lieu</td><td style="color:#1a1a1a;">${order.event.location}</td></tr>
-              <tr><td style="color:#888;padding:5px 0;">N° Commande</td><td style="color:#D4A853;font-family:monospace;font-weight:bold;">${order.orderNumber}</td></tr>
-              <tr><td style="color:#888;padding:5px 0;">Montant payé</td><td style="color:#16a34a;font-weight:bold;">${order.totalAmount.toLocaleString()} MRU</td></tr>
-            </table>
-          </div>
-
-          <h2 style="color:#1a1a1a;font-size:16px;margin:0 0 8px;">🎟️ Vos tickets QR</h2>
-          <p style="color:#666;font-size:13px;margin:0 0 16px;">Présentez ces QR codes à l'entrée. L'agent les scannera pour valider votre accès. Chaque ticket est valide <strong>une seule fois</strong>.</p>
-          ${ticketsHTML}
-        </div>
-
-        <div style="text-align:center;color:#999;font-size:11px;padding:16px;">
-          <p style="margin:0;">Mauti-Ticket — La première plateforme de tickets en ligne en Mauritanie</p>
-          <p style="margin:4px 0 0;">Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
-        </div>
-      </div>
-    </body></html>
-  `;
-
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM || `Mauti-Ticket <${process.env.MAIL_USER}>`,
-    to: email,
-    subject: `🎫 Vos tickets - ${order.event.title} | Mauti-Ticket`,
-    html,
-    attachments,  // QR codes en pièces jointes inline
-  });
-  console.log(`📧 Email envoyé à ${email} avec ${attachments.length} ticket(s)`);
-};
 
 const mkOrderNumber = () => `MT-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 const mkTicketNumber = () => `TK-${uuid().split('-')[0].toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
@@ -260,13 +164,6 @@ exports.confirm = async (req, res) => {
         user: { select: { email: true, name: true } }
       }
     });
-
-    // Envoyer l'email avec les tickets
-    try {
-      await sendTicketEmail(confirmed, allTickets);
-    } catch (mailErr) {
-      console.error('❌ Erreur envoi email:', mailErr.message);
-    }
 
     res.json({ success: true, order: confirmed, tickets: allTickets });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }

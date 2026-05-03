@@ -186,7 +186,7 @@ export default function MyTicketsPage() {
                         ))}
                       </div>
                       <p className="text-xs text-center text-gray-600 mt-5">
-                        Vos tickets ont aussi ete envoyes par email
+                        Retrouvez toujours vos tickets ici apres connexion
                       </p>
                     </div>
                   )}
@@ -207,7 +207,7 @@ export default function MyTicketsPage() {
                         <Clock className="w-5 h-5 text-blue-400 shrink-0 animate-pulse" />
                         <div>
                           <p className="text-sm font-bold text-blue-300">Recu recu — En attente de validation</p>
-                          <p className="text-xs text-blue-400/70 mt-0.5">L organisateur va valider votre paiement. Vos tickets arriveront par email et apparaitront ici.</p>
+                          <p className="text-xs text-blue-400/70 mt-0.5">L organisateur va valider votre paiement. Vos tickets apparaitront ici des que l'organisateur valide votre paiement.</p>
                         </div>
                       </div>
                     </div>

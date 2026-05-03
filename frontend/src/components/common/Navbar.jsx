@@ -37,7 +37,12 @@ export default function Navbar() {
             <Link to="/contact" className="flex items-center gap-1.5 text-desert-300 hover:text-sahara-400 font-medium transition-colors text-sm">
               <Phone className="w-3.5 h-3.5" /> Contact
             </Link>
-            {user && dashboardLink() && (
+            {user && user.role === 'USER' && (
+              <Link to="/mes-tickets" className="flex items-center gap-1.5 text-desert-300 hover:text-sahara-400 font-medium transition-colors text-sm">
+                <Ticket className="w-3.5 h-3.5" /> Mes Tickets
+              </Link>
+            )}
+            {user && user.role !== 'USER' && dashboardLink() && (
               <Link to={dashboardLink()} className="text-desert-300 hover:text-sahara-400 font-medium transition-colors text-sm">Mon espace</Link>
             )}
           </div>
@@ -78,7 +83,10 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t border-night-700 space-y-2 animate-slide-up">
             <Link to="/" className="block px-4 py-2 text-desert-300 hover:text-sahara-400" onClick={() => setOpen(false)}>Accueil</Link>
             <Link to="/contact" className="block px-4 py-2 text-desert-300 hover:text-sahara-400" onClick={() => setOpen(false)}>Contact</Link>
-            {user && dashboardLink() && (
+            {user && user.role === 'USER' && (
+              <Link to="/mes-tickets" className="block px-4 py-2 text-desert-300 hover:text-sahara-400" onClick={() => setOpen(false)}>🎟️ Mes Tickets</Link>
+            )}
+            {user && user.role !== 'USER' && dashboardLink() && (
               <Link to={dashboardLink()} className="block px-4 py-2 text-desert-300 hover:text-sahara-400" onClick={() => setOpen(false)}>Mon espace</Link>
             )}
             {user ? (
