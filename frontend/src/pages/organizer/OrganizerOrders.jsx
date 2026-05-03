@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle, Eye, Clock, XCircle } from 'lucide-react'
-import api from '../../utils/api'
+import api, { BASE_URL } from '../../utils/api'
 
 const STATUS = {
   PENDING:          { label: 'En attente',       color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
@@ -110,7 +110,7 @@ export default function OrganizerOrders() {
                   {/* Actions */}
                   <div className="flex flex-col gap-2 shrink-0">
                     {order.paymentProof && (
-                      <button onClick={() => setProofModal(`http://localhost:5000${order.paymentProof}`)}
+                      <button onClick={() => setProofModal(`${BASE_URL}${order.paymentProof}`)}
                         className="flex items-center gap-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 px-3 py-2 rounded-lg transition-colors">
                         <Eye className="w-3.5 h-3.5" />Voir reçu
                       </button>

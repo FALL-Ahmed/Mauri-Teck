@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Search, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react'
-import api from '../../utils/api'
+import api, { BASE_URL } from '../../utils/api'
 
 export default function AdminOrganizers() {
   const [organizers, setOrganizers] = useState([])
@@ -88,7 +88,7 @@ export default function AdminOrganizers() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         {org.organizer?.logo ? (
-                          <img src={`http://localhost:5000${org.organizer.logo}`} className="w-9 h-9 rounded-lg object-cover" />
+                          <img src={`${BASE_URL}${org.organizer.logo}`} className="w-9 h-9 rounded-lg object-cover" />
                         ) : (
                           <div className="w-9 h-9 bg-sahara-500/20 rounded-lg flex items-center justify-center text-sahara-400 font-bold text-sm">
                             {org.name[0]}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Plus, Trash2, ArrowLeft, Upload, Tag } from 'lucide-react'
-import api from '../../utils/api'
+import api, { BASE_URL } from '../../utils/api'
 
 const emptyTicket = { name: '', description: '', price: '', totalSeats: '', color: '#f59e0b', benefits: [] }
 
@@ -32,7 +32,7 @@ export default function OrganizerEventForm() {
           location: e.location, address: e.address || '', city: e.city, categoryId: e.categoryId
         })
         setTicketTypes(e.ticketTypes.map(t => ({ ...t, price: t.price.toString(), totalSeats: t.totalSeats.toString() })))
-        if (e.image) setImagePreview(`http://localhost:5000${e.image}`)
+        if (e.image) setImagePreview(`${BASE_URL}${e.image}`)
       })
     }
   }, [id])

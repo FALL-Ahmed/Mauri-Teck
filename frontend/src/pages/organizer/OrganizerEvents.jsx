@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Calendar, MapPin, Users, Edit, Eye, Send } from 'lucide-react'
-import api from '../../utils/api'
+import api, { BASE_URL } from '../../utils/api'
 
 const STATUS = {
   DRAFT:     { label: 'Brouillon',  color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
@@ -61,7 +61,7 @@ export default function OrganizerEvents() {
               <div key={event.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all">
                 <div className="flex gap-4 p-5">
                   {event.image ? (
-                    <img src={`http://localhost:5000${event.image}`} className="w-24 h-24 rounded-xl object-cover shrink-0" />
+                    <img src={`${BASE_URL}${event.image}`} className="w-24 h-24 rounded-xl object-cover shrink-0" />
                   ) : (
                     <div className="w-24 h-24 bg-sahara-500/10 rounded-xl flex items-center justify-center shrink-0">
                       <Calendar className="w-8 h-8 text-sahara-400/50" />

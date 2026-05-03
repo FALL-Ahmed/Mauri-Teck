@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar, MapPin, Ticket, Eye } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import api from '../../utils/api'
+import api, { BASE_URL } from '../../utils/api'
 
 const STATUS = {
   DRAFT:     { label: 'Brouillon',  color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
@@ -49,7 +49,7 @@ export default function AdminEvents() {
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           {event.image ? (
-                            <img src={`http://localhost:5000${event.image}`} className="w-10 h-10 rounded-lg object-cover" />
+                            <img src={`${BASE_URL}${event.image}`} className="w-10 h-10 rounded-lg object-cover" />
                           ) : (
                             <div className="w-10 h-10 bg-sahara-500/10 rounded-lg flex items-center justify-center">
                               <Calendar className="w-4 h-4 text-sahara-400" />

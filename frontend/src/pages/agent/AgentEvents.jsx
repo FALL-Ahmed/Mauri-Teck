@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Calendar, MapPin, QrCode, Users } from 'lucide-react'
-import api from '../../utils/api'
+import api, { BASE_URL } from '../../utils/api'
 
 export default function AgentEvents() {
   const [events, setEvents] = useState([])
@@ -37,7 +37,7 @@ export default function AgentEvents() {
               className="block bg-white/5 border border-white/10 hover:border-sahara-500/40 rounded-2xl p-5 transition-all group">
               <div className="flex gap-4">
                 {event.image ? (
-                  <img src={`http://localhost:5000${event.image}`} className="w-20 h-20 rounded-xl object-cover shrink-0" />
+                  <img src={`${BASE_URL}${event.image}`} className="w-20 h-20 rounded-xl object-cover shrink-0" />
                 ) : (
                   <div className="w-20 h-20 bg-sahara-500/10 rounded-xl flex items-center justify-center shrink-0">
                     <Calendar className="w-8 h-8 text-sahara-400/50" />
