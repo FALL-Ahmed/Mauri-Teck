@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mauri-ticket.com/sitemap.xml
