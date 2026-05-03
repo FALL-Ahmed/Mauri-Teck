@@ -9,7 +9,7 @@ exports.createOrganizer = async (req, res) => {
     if (await prisma.user.findUnique({ where: { email } }))
       return res.status(400).json({ success: false, message: 'Email déjà utilisé' });
 
-    const logo = req.file ? `/uploads/logos/${req.file.filename}` : null;
+    const logo = req.file ? req.file.path : null;
     const user = await prisma.user.create({
       data: {
         email, name, phone, role: 'ORGANIZER', createdBy: req.user.id,
@@ -99,7 +99,7 @@ exports.toggleStatus = async (req, res) => {
 exports.updateLogo = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'Fichier requis' });
-    const logo = `/uploads/logos/${req.file.filename}`;
+    const logo = req.file.path;
     await prisma.organizer.update({ where: { userId: req.user.id }, data: { logo } });
     res.json({ success: true, logo });
   } catch {

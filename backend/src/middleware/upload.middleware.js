@@ -1,16 +1,20 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-const storage = (folder) => multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, `../../uploads/${folder}`);
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = (folder) => new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: `mauri-ticket/${folder}`,
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
   },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname)}`);
-  }
 });
 
 const imageFilter = (req, file, cb) => {

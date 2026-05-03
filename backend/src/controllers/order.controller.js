@@ -53,7 +53,7 @@ exports.uploadProof = async (req, res) => {
     if (!order) return res.status(404).json({ success: false, message: 'Commande introuvable' });
     const updated = await prisma.order.update({
       where: { id },
-      data: { paymentProof: `/uploads/receipts/${req.file.filename}`, status: 'PAYMENT_UPLOADED' }
+      data: { paymentProof: req.file.path, status: 'PAYMENT_UPLOADED' }
     });
     res.json({ success: true, order: updated });
   } catch { res.status(500).json({ success: false, message: 'Erreur serveur' }); }

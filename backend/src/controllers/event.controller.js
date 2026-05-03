@@ -63,7 +63,7 @@ exports.getMyEvents = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { title, description, date, endDate, location, address, city, categoryId, ticketTypes } = req.body;
-    const image = req.file ? `/uploads/events/${req.file.filename}` : null;
+    const image = req.file ? req.file.path : null;
     const parsedTickets = typeof ticketTypes === 'string' ? JSON.parse(ticketTypes) : ticketTypes || [];
 
     const event = await prisma.event.create({
@@ -93,7 +93,7 @@ exports.update = async (req, res) => {
   try {
     const ev = await prisma.event.findFirst({ where: { id: req.params.id, organizerId: req.user.organizer.id } });
     if (!ev) return res.status(404).json({ success: false, message: 'Événement introuvable' });
-    const image = req.file ? `/uploads/events/${req.file.filename}` : ev.image;
+    const image = req.file ? req.file.path : ev.image;
     const { title, description, date, endDate, location, address, city, categoryId, status } = req.body;
     const updated = await prisma.event.update({
       where: { id: req.params.id },
