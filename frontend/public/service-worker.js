@@ -1,5 +1,4 @@
 const CACHE_NAME = "mauri-ticket-v1";
-navigator.serviceWorker.register("/service-worker.js");
 const urlsToCache = [
   "/",
   "/index.html",
