@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BASE_URL } from '../../utils/api'
 import { Calendar, MapPin, Ticket, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -15,7 +16,7 @@ export default function EventCard({ event }) {
         {/* Image */}
         <div className="relative h-48 bg-night-700 overflow-hidden">
           {event.image ? (
-            <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <img src={event.image?.startsWith('http') ? event.image : `${BASE_URL}${event.image}`} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-night-700 to-night-900">
               <Ticket className="w-16 h-16 text-night-600" />
