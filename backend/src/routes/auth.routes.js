@@ -1,10 +1,10 @@
 const router = require('express').Router()
 const ctrl = require('../controllers/auth.controller')
 const { authenticate } = require('../middleware/auth.middleware')
-
 router.post('/register', ctrl.register)
 router.post('/login', ctrl.login)
+router.post('/check-phone', ctrl.checkPhone)
+router.post('/reset-password', ctrl.resetPassword)
 router.get('/me', authenticate, ctrl.me)
 router.put('/change-password', authenticate, ctrl.changePassword)
-
 module.exports = router

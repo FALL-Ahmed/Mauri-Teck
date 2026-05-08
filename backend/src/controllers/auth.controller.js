@@ -7,16 +7,23 @@ const signToken = (id) => jwt.sign({ userId: id }, process.env.JWT_SECRET, { exp
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body
-    if (!name || !email || !password) return res.status(400).json({ success: false, message: 'Tous les champs sont requis' })
-    if (password.length < 6) return res.status(400).json({ success: false, message: 'Le mot de passe doit avoir au moins 6 caractères' })
+    const { name, phone, password } = req.body
 
-    const existing = await prisma.user.findUnique({ where: { email } })
-    if (existing) return res.status(400).json({ success: false, message: 'Cet email est déjà utilisé' })
+    // Validation des champs obligatoires
+    if (!name || !phone || !password)
+      return res.status(400).json({ success: false, message: 'Tous les champs sont requis' })
+
+    if (password.length < 6)
+      return res.status(400).json({ success: false, message: 'Le mot de passe doit avoir au moins 6 caractères' })
+
+    // Vérification unicité du numéro de téléphone
+    const existing = await prisma.user.findUnique({ where: { phone } })
+    if (existing)
+      return res.status(400).json({ success: false, message: 'Ce numéro de téléphone est déjà utilisé' })
 
     const hashed = await bcrypt.hash(password, 12)
     const user = await prisma.user.create({
-      data: { name, email, phone, password: hashed, role: 'BUYER' }
+      data: { name, phone, password: hashed, role: 'BUYER' }
     })
 
     const { password: _, ...safe } = user
@@ -29,15 +36,21 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body
-    if (!email || !password) return res.status(400).json({ success: false, message: 'Email et mot de passe requis' })
+    const { phone, password } = req.body
+    if (!phone || !password)
+      return res.status(400).json({ success: false, message: 'Numéro de téléphone et mot de passe requis' })
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { phone },
       include: { organizer: true, agent: { include: { organizer: true } } }
     })
+
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ success: false, message: 'Identifiants incorrects' })
-    if (!user.isActive) return res.status(403).json({ success: false, message: 'Compte désactivé' })
+
+    if (!user.isActive)
+      return res.status(403).json({ success: false, message: 'Compte désactivé' })
+
     const { password: _, ...safe } = user
     res.json({ success: true, token: signToken(user.id), user: safe })
   } catch (e) {
@@ -58,6 +71,31 @@ exports.changePassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Mot de passe actuel incorrect' })
     await prisma.user.update({ where: { id: req.user.id }, data: { password: await bcrypt.hash(newPassword, 12) } })
     res.json({ success: true, message: 'Mot de passe modifié' })
+  } catch {
+    res.status(500).json({ success: false, message: 'Erreur serveur' })
+  }
+}
+exports.checkPhone = async (req, res) => {
+  try {
+    const { phone } = req.body
+    if (!phone) return res.status(400).json({ success: false, message: 'Numéro de téléphone requis' })
+    const user = await prisma.user.findUnique({ where: { phone } })
+    if (!user) return res.status(404).json({ success: false, message: 'Aucun compte associé à ce numéro' })
+    res.json({ success: true, message: 'Numéro vérifié' })
+  } catch {
+    res.status(500).json({ success: false, message: 'Erreur serveur' })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { phone, password } = req.body
+    if (!phone || !password) return res.status(400).json({ success: false, message: 'Champs requis manquants' })
+    if (password.length < 6) return res.status(400).json({ success: false, message: 'Le mot de passe doit avoir au moins 6 caractères' })
+    const user = await prisma.user.findUnique({ where: { phone } })
+    if (!user) return res.status(404).json({ success: false, message: 'Aucun compte associé à ce numéro' })
+    await prisma.user.update({ where: { phone }, data: { password: await bcrypt.hash(password, 12) } })
+    res.json({ success: true, message: 'Mot de passe réinitialisé avec succès' })
   } catch {
     res.status(500).json({ success: false, message: 'Erreur serveur' })
   }
