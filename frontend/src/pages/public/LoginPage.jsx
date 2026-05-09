@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Eye, EyeOff, Ticket, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ phone: '', password: '' })
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const user = await login(form.email, form.password)
+      const user = await login(form.phone, form.password)
       if (redirect) navigate(redirect)
       else if (user.role === 'ADMIN') navigate('/admin')
       else if (user.role === 'ORGANIZER') navigate('/organisateur')
@@ -57,9 +57,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required
-                placeholder="votre@email.com"
+              <label className="block text-sm font-medium text-gray-300 mb-2">Numéro de téléphone</label>
+              <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required
+                placeholder="+222 XX XX XX XX"
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 focus:ring-1 focus:ring-sahara-400/50 transition-all" />
             </div>
             <div>

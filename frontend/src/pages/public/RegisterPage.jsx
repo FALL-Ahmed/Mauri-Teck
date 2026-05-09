@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff, Ticket, User, Mail, Phone, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Ticket, User, Phone, AlertCircle } from 'lucide-react'
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' })
+  const [form, setForm] = useState({ name: '', phone: '', password: '', confirm: '' })
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ export default function RegisterPage() {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, password: form.password })
+        body: JSON.stringify({ name: form.name, phone: form.phone, password: form.password })
       })
       const data = await res.json()
       if (!data.success) { setError(data.message); return }
@@ -63,15 +63,6 @@ export default function RegisterPage() {
                 <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
                 <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required
                   placeholder="Prénom Nom"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
-                <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required
-                  placeholder="votre@email.com"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
               </div>
             </div>
