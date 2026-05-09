@@ -110,7 +110,7 @@ export default function OrganizerOrders() {
                   {/* Actions */}
                   <div className="flex flex-col gap-2 shrink-0">
                     {order.paymentProof && (
-                      <button onClick={() => setProofModal(`${BASE_URL}${order.paymentProof}`)}
+                      <button onClick={() => setProofModal(order.paymentProof.startsWith('http') ? order.paymentProof : `${BASE_URL}${order.paymentProof}`)}
                         className="flex items-center gap-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 px-3 py-2 rounded-lg transition-colors">
                         <Eye className="w-3.5 h-3.5" />Voir reçu
                       </button>
