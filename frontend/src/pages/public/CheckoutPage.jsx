@@ -11,23 +11,23 @@ const PAYMENT_METHODS = [
   {
     value: 'masrivi',
     label: 'Masrivi',
+    logo: '/Masrivi.png',
     number: '+222 42212334',
-    color: '#00A651',
     desc: 'Envoyez le montant sur ce numéro Masrivi puis uploadez le reçu'
   },
   {
     value: 'bankily',
     label: 'Bankily',
+    logo: '/Bankily.png',
     number: '+222 22212334',
-    color: '#F7A800',
     desc: 'Envoyez le montant sur ce numéro Bankily puis uploadez le reçu'
   },
   {
-    value: 'virement',
-    label: 'Virement bancaire',
-    number: null,
-    color: '#378ADD',
-    desc: 'Contactez-nous pour les détails du virement'
+    value: 'sedad',
+    label: 'Sedad',
+    logo: '/sedad.png',
+    number: '+222 32212334',
+    desc: 'Envoyez le montant sur ce numéro Sedad puis uploadez le reçu'
   }
 ]
 
@@ -133,7 +133,7 @@ export default function CheckoutPage() {
                     <button key={m.value} type="button"
                       onClick={() => setForm({...form, paymentMethod: m.value})}
                       className={`p-3 rounded-xl border-2 text-center transition-all ${form.paymentMethod === m.value ? 'border-sahara-400 bg-sahara-400/10' : 'border-night-700 bg-night-800 hover:border-night-600'}`}>
-                      <div className="w-6 h-6 rounded-full mx-auto mb-1" style={{background: m.color}} />
+                      <img src={m.logo} alt={m.label} className="h-8 w-auto mx-auto mb-1 object-contain" />
                       <p className="text-xs font-bold text-desert-200">{m.label}</p>
                     </button>
                   ))}
