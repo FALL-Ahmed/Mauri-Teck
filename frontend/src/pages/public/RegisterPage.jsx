@@ -66,8 +66,9 @@ export default function RegisterPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
               </div>
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Téléphone</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Numéro de téléphone</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
                 <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required
@@ -75,6 +76,7 @@ export default function RegisterPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
               </div>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Mot de passe</label>
               <div className="relative">
@@ -86,12 +88,14 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Confirmer le mot de passe</label>
               <input type="password" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} required
                 placeholder="••••••••"
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
             </div>
+
             <button type="submit" disabled={loading}
               className="w-full bg-gradient-to-r from-sahara-500 to-sahara-600 hover:from-sahara-400 hover:to-sahara-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg disabled:opacity-50 mt-2">
               {loading ? (

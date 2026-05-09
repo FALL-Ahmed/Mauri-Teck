@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, CheckCircle, AlertCircle, User, Mail, Phone, FileImage, Copy } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, User, Phone, FileImage, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navbar from '../../components/common/Navbar'
 import { useCart } from '../../context/CartContext'
@@ -12,6 +12,7 @@ const PAYMENT_METHODS = [
     value: 'masrivi',
     label: 'Masrivi',
     logo: '/Masrivi.png',
+    color: '#00A651',
     number: '+222 42212334',
     desc: 'Envoyez le montant sur ce numéro Masrivi puis uploadez le reçu'
   },
@@ -19,6 +20,7 @@ const PAYMENT_METHODS = [
     value: 'bankily',
     label: 'Bankily',
     logo: '/Bankily.png',
+    color: '#F7A800',
     number: '+222 22212334',
     desc: 'Envoyez le montant sur ce numéro Bankily puis uploadez le reçu'
   },
@@ -26,6 +28,7 @@ const PAYMENT_METHODS = [
     value: 'sedad',
     label: 'Sedad',
     logo: '/sedad.png',
+    color: '#E63946',
     number: '+222 32212334',
     desc: 'Envoyez le montant sur ce numéro Sedad puis uploadez le reçu'
   }
@@ -36,7 +39,7 @@ export default function CheckoutPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', paymentMethod: 'masrivi', notes: '' })
+  const [form, setForm] = useState({ name: user?.name || '', phone: user?.phone || '', paymentMethod: 'masrivi', notes: '' })
   const [proofFile, setProofFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
@@ -54,7 +57,7 @@ export default function CheckoutPage() {
   const selectedMethod = PAYMENT_METHODS.find(m => m.value === form.paymentMethod)
 
   const handleOrder = async () => {
-    if (!form.name || !form.email || !form.phone) { toast.error('Remplissez tous les champs'); return }
+    if (!form.name || !form.phone) { toast.error('Remplissez tous les champs'); return }
     const events = Object.values(byEvent)
     if (events.length > 1) { toast.error('Un seul événement par commande svp'); return }
     setLoading(true)
@@ -62,7 +65,7 @@ export default function CheckoutPage() {
       const { data } = await api.post('/orders', {
         eventId: events[0].eventId,
         items: cart.map(i => ({ ticketTypeId: i.ticketTypeId, quantity: i.quantity })),
-        guestName: form.name, guestEmail: form.email, guestPhone: form.phone,
+        guestName: form.name, guestPhone: form.phone,
         paymentMethod: form.paymentMethod, notes: form.notes
       })
       setOrderId(data.order.id)
@@ -112,13 +115,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <div>
-                <label className="text-desert-300 text-sm font-medium block mb-1.5">Email *</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3.5 w-4 h-4 text-desert-500" />
-                  <input className="input pl-10" type="email" placeholder="email@exemple.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-                </div>
-              </div>
-              <div>
                 <label className="text-desert-300 text-sm font-medium block mb-1.5">Téléphone *</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3.5 w-4 h-4 text-desert-500" />
@@ -133,7 +129,8 @@ export default function CheckoutPage() {
                     <button key={m.value} type="button"
                       onClick={() => setForm({...form, paymentMethod: m.value})}
                       className={`p-3 rounded-xl border-2 text-center transition-all ${form.paymentMethod === m.value ? 'border-sahara-400 bg-sahara-400/10' : 'border-night-700 bg-night-800 hover:border-night-600'}`}>
-                      <img src={m.logo} alt={m.label} className="h-8 w-auto mx-auto mb-1 object-contain" />
+                      <img src={m.logo} alt={m.label} className="h-8 w-auto mx-auto mb-1 object-contain"
+                        onError={e => { e.target.style.display='none' }} />
                       <p className="text-xs font-bold text-desert-200">{m.label}</p>
                     </button>
                   ))}
@@ -199,16 +196,23 @@ export default function CheckoutPage() {
               </div>
 
               {selectedMethod?.number && (
-                <div className="p-4 rounded-xl mb-4" style={{background: selectedMethod.color + '15', border: `1px solid ${selectedMethod.color}40`}}>
-                  <p className="text-sm font-bold mb-1" style={{color: selectedMethod.color}}>{selectedMethod.label}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="font-mono font-bold text-desert-100 text-xl">{selectedMethod.number}</p>
-                    <button onClick={() => { navigator.clipboard.writeText(selectedMethod.number); toast.success('Numéro copié !') }}
-                      className="flex items-center gap-1 text-xs text-desert-400 hover:text-desert-200 transition-colors">
-                      <Copy className="w-3 h-3" /> Copier
-                    </button>
+                <div className="p-4 rounded-xl mb-4 flex items-center gap-4" style={{background: selectedMethod.color + '15', border: `1px solid ${selectedMethod.color}40`}}>
+                  {selectedMethod.logo && (
+                    <img src={selectedMethod.logo} alt={selectedMethod.label}
+                      className="w-14 h-14 rounded-xl object-cover shrink-0"
+                      onError={e => { e.target.style.display='none' }} />
+                  )}
+                  <div className="flex-1">
+                    <p className="text-sm font-bold mb-1" style={{color: selectedMethod.color}}>{selectedMethod.label}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-mono font-bold text-desert-100 text-xl">{selectedMethod.number}</p>
+                      <button onClick={() => { navigator.clipboard.writeText(selectedMethod.number); toast.success('Numéro copié !') }}
+                        className="flex items-center gap-1 text-xs text-desert-400 hover:text-desert-200 transition-colors">
+                        <Copy className="w-3 h-3" /> Copier
+                      </button>
+                    </div>
+                    <p className="text-desert-400 text-xs mt-1">Envoyez exactement <span className="text-sahara-400 font-bold">{total.toLocaleString()} MRU</span></p>
                   </div>
-                  <p className="text-desert-400 text-xs mt-2">Envoyez exactement <span className="text-sahara-400 font-bold">{total.toLocaleString()} MRU</span> sur ce numéro</p>
                 </div>
               )}
 
