@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff, Ticket, User, Mail, Phone, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Ticket, User, Phone, AlertCircle } from 'lucide-react'
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' })
+  const [form, setForm] = useState({ name: '', phone: '', password: '', confirm: '' })
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ export default function RegisterPage() {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, password: form.password })
+        body: JSON.stringify({ name: form.name, phone: form.phone, password: form.password })
       })
       const data = await res.json()
       if (!data.success) { setError(data.message); return }
@@ -57,6 +57,7 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Nom complet */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Nom complet</label>
               <div className="relative">
@@ -66,17 +67,10 @@ export default function RegisterPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
               </div>
             </div>
+
+            {/* Téléphone */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
-                <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required
-                  placeholder="votre@email.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Téléphone</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Numéro de téléphone</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
                 <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required
@@ -84,6 +78,8 @@ export default function RegisterPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
               </div>
             </div>
+
+            {/* Mot de passe */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Mot de passe</label>
               <div className="relative">
@@ -95,12 +91,15 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
+
+            {/* Confirmer mot de passe */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Confirmer le mot de passe</label>
               <input type="password" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} required
                 placeholder="••••••••"
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
             </div>
+
             <button type="submit" disabled={loading}
               className="w-full bg-gradient-to-r from-sahara-500 to-sahara-600 hover:from-sahara-400 hover:to-sahara-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg disabled:opacity-50 mt-2">
               {loading ? (

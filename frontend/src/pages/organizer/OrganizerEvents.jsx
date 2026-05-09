@@ -10,6 +10,11 @@ const STATUS = {
   COMPLETED: { label: 'Terminé',    color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 }
 
+const getImgSrc = (image) => {
+  if (!image) return null
+  return image.startsWith('http') ? image : `${BASE_URL}${image}`
+}
+
 export default function OrganizerEvents() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -57,11 +62,12 @@ export default function OrganizerEvents() {
             const s = STATUS[event.status]
             const totalSeats = event.ticketTypes.reduce((acc, t) => acc + t.totalSeats, 0)
             const soldSeats = totalSeats - event.ticketTypes.reduce((acc, t) => acc + t.availableSeats, 0)
+            const imgSrc = getImgSrc(event.image)
             return (
               <div key={event.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all">
                 <div className="flex gap-4 p-5">
-                  {event.image ? (
-                    <img src={`${BASE_URL}${event.image}`} className="w-24 h-24 rounded-xl object-cover shrink-0" />
+                  {imgSrc ? (
+                    <img src={imgSrc} alt={event.title} className="w-24 h-24 rounded-xl object-cover shrink-0" />
                   ) : (
                     <div className="w-24 h-24 bg-sahara-500/10 rounded-xl flex items-center justify-center shrink-0">
                       <Calendar className="w-8 h-8 text-sahara-400/50" />

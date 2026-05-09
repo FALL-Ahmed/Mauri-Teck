@@ -6,6 +6,7 @@ import HomePage from './pages/public/HomePage'
 import EventDetailPage from './pages/public/EventDetailPage'
 import LoginPage from './pages/public/LoginPage'
 import RegisterPage from './pages/public/RegisterPage'
+import ForgotPasswordPage from './pages/public/ForgotPasswordPage'
 import CartPage from './pages/public/CartPage'
 import CheckoutPage from './pages/public/CheckoutPage'
 import OrderTrackPage from './pages/public/OrderTrackPage'
@@ -43,35 +44,36 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
         <Routes>
-          <Route path="/"             element={<HomePage />} />
-          <Route path="/events/:id"   element={<EventDetailPage />} />
-          <Route path="/login"        element={<LoginPage />} />
-          <Route path="/register"     element={<RegisterPage />} />
-          <Route path="/panier"       element={<CartPage />} />
-          <Route path="/checkout"     element={<CheckoutPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
+          <Route path="/panier" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/track/:orderNumber" element={<OrderTrackPage />} />
-          <Route path="/mes-tickets"  element={<ProtectedRoute><MyTicketsPage /></ProtectedRoute>} />
-          <Route path="/contact"      element={<ContactPage />} />
+          <Route path="/mes-tickets" element={<ProtectedRoute><MyTicketsPage /></ProtectedRoute>} />
+          <Route path="/contact" element={<ContactPage />} />
 
           <Route path="/admin" element={<ProtectedRoute roles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>
-            <Route index         element={<AdminDashboard />} />
+            <Route index element={<AdminDashboard />} />
             <Route path="organisateurs" element={<AdminOrganizers />} />
-            <Route path="evenements"    element={<AdminEvents />} />
-            <Route path="commandes"     element={<AdminOrders />} />
-            <Route path="categories"    element={<AdminCategories />} />
+            <Route path="evenements" element={<AdminEvents />} />
+            <Route path="commandes" element={<AdminOrders />} />
+            <Route path="categories" element={<AdminCategories />} />
           </Route>
 
           <Route path="/organisateur" element={<ProtectedRoute roles={['ORGANIZER']}><OrganizerLayout /></ProtectedRoute>}>
-            <Route index              element={<OrganizerDashboard />} />
-            <Route path="evenements"  element={<OrganizerEvents />} />
+            <Route index element={<OrganizerDashboard />} />
+            <Route path="evenements" element={<OrganizerEvents />} />
             <Route path="evenements/nouveau" element={<OrganizerEventForm />} />
             <Route path="evenements/:id/modifier" element={<OrganizerEventForm />} />
-            <Route path="commandes"   element={<OrganizerOrders />} />
-            <Route path="agents"      element={<OrganizerAgents />} />
+            <Route path="commandes" element={<OrganizerOrders />} />
+            <Route path="agents" element={<OrganizerAgents />} />
           </Route>
 
           <Route path="/agent" element={<ProtectedRoute roles={['AGENT']}><AgentLayout /></ProtectedRoute>}>
-            <Route index           element={<AgentEvents />} />
+            <Route index element={<AgentEvents />} />
             <Route path="scanner/:eventId" element={<AgentScanner />} />
           </Route>
 

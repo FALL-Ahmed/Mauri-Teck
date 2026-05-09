@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Eye, EyeOff, Ticket, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Ticket, Phone, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ phone: '', password: '' })
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,7 +18,8 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const user = await login(form.email, form.password)
+      const user = await login(form.phone, form.password)
+      console.log('USER CONNECTÉ:', user)
       if (redirect) navigate(redirect)
       else if (user.role === 'ADMIN') navigate('/admin')
       else if (user.role === 'ORGANIZER') navigate('/organisateur')
@@ -57,11 +58,15 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required
-                placeholder="votre@email.com"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 focus:ring-1 focus:ring-sahara-400/50 transition-all" />
+              <label className="block text-sm font-medium text-gray-300 mb-2">Numéro de téléphone</label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
+                <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required
+                  placeholder="+222 XX XX XX XX"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 focus:ring-1 focus:ring-sahara-400/50 transition-all" />
+              </div>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Mot de passe</label>
               <div className="relative">
@@ -73,6 +78,7 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
             <button type="submit" disabled={loading}
               className="w-full bg-gradient-to-r from-sahara-500 to-sahara-600 hover:from-sahara-400 hover:to-sahara-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-sahara-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? (
@@ -88,6 +94,9 @@ export default function LoginPage() {
             <p className="text-sm text-gray-400">
               Pas encore de compte ?{' '}
               <Link to="/register" className="text-sahara-400 hover:text-sahara-300 font-semibold">Créer un compte</Link>
+            </p>
+            <p className="text-sm text-gray-400">
+              <Link to="/mot-de-passe-oublie" className="text-sahara-400 hover:text-sahara-300 font-semibold">Mot de passe oublié ?</Link>
             </p>
             <Link to="/" className="block text-sm text-gray-400 hover:text-sahara-400 transition-colors">
               ← Retour à l'accueil
