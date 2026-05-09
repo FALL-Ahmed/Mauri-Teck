@@ -1,10 +1,10 @@
 const router = require('express').Router();
 const ctrl = require('../controllers/order.controller');
-const { authenticate, authorize } = require('../middleware/auth.middleware');
+const { authenticate, authorize, optionalAuthenticate } = require('../middleware/auth.middleware');
 const { uploadPaymentProof } = require('../middleware/upload.middleware');
 
 // Public / guest
-router.post('/',                   ctrl.create);
+router.post('/',                   optionalAuthenticate, ctrl.create);
 router.get('/track/:orderNumber',  ctrl.trackOrder);
 router.post('/:id/payment-proof',  uploadPaymentProof, ctrl.uploadProof);
 

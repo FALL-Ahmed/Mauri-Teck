@@ -35,4 +35,19 @@ const authorize = (...roles) => (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate, authorize };
+const optionalAuthenticate = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization;
+    if (!header?.startsWith('Bearer ')) return next();
+    const token = header.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      include: { organizer: true, agent: { include: { organizer: true } } }
+    });
+    if (user && user.isActive) req.user = user;
+  } catch { /* token invalide ou absent → on continue comme guest */ }
+  next();
+};
+
+module.exports = { authenticate, authorize, optionalAuthenticate };
