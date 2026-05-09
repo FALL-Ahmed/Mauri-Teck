@@ -79,7 +79,11 @@ export default function OrganizerEvents() {
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full border shrink-0 ${s?.color}`}>{s?.label}</span>
                     </div>
                     <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(event.date).toLocaleDateString('fr-FR')}</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(event.date).toLocaleDateString('fr-FR')}
+                        {event.endDate && ` → ${new Date(event.endDate).toLocaleDateString('fr-FR')}`}
+                      </span>
                       <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.city}</span>
                       <span className="flex items-center gap-1"><Users className="w-3 h-3" />{soldSeats}/{totalSeats} places</span>
                     </div>

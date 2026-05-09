@@ -63,6 +63,8 @@ exports.getMyEvents = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { title, description, date, endDate, location, address, city, categoryId, ticketTypes } = req.body;
+    if (endDate && new Date(endDate) <= new Date(date))
+      return res.status(400).json({ success: false, message: 'La date de fin doit être après la date de début' });
     const image = req.file ? req.file.path : null;
     const parsedTickets = typeof ticketTypes === 'string' ? JSON.parse(ticketTypes) : ticketTypes || [];
 
@@ -95,6 +97,8 @@ exports.update = async (req, res) => {
     if (!ev) return res.status(404).json({ success: false, message: 'Événement introuvable' });
     const image = req.file ? req.file.path : ev.image;
     const { title, description, date, endDate, location, address, city, categoryId, status } = req.body;
+    if (endDate && new Date(endDate) <= new Date(date))
+      return res.status(400).json({ success: false, message: 'La date de fin doit être après la date de début' });
     const updated = await prisma.event.update({
       where: { id: req.params.id },
       data: { title, description, date: new Date(date), endDate: endDate ? new Date(endDate) : null, location, address, city, categoryId, status, image },

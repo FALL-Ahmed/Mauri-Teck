@@ -32,7 +32,7 @@ export default function OrganizerEventForm() {
           location: e.location, address: e.address || '', city: e.city, categoryId: e.categoryId
         })
         setTicketTypes(e.ticketTypes.map(t => ({ ...t, price: t.price.toString(), totalSeats: t.totalSeats.toString() })))
-        if (e.image) setImagePreview(`${BASE_URL}${e.image}`)
+        if (e.image) setImagePreview(e.image.startsWith('http') ? e.image : `${BASE_URL}${e.image}`)
       })
     }
   }, [id])
@@ -55,6 +55,10 @@ export default function OrganizerEventForm() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true); setError('')
+    if (form.endDate && new Date(form.endDate) <= new Date(form.date)) {
+      setError('La date de fin doit être après la date de début')
+      setSubmitting(false); return
+    }
     try {
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => fd.append(k, v))

@@ -46,12 +46,13 @@ export default function EventDetailPage() {
   if (!event) return null
 
   const eventDate = new Date(event.date)
+  const eventEndDate = event.endDate ? new Date(event.endDate) : null
   const now = new Date()
-  const isEventPassed = now > eventDate  // ← vérification date
+  const isEventPassed = now > (eventEndDate || eventDate)
 
   const imgSrc = event.image ? (event.image.startsWith('http') ? event.image : `${BASE}${event.image}`) : null
 
-  // Calcul du temps restant
+  // Calcul du temps restant (basé sur la date de début)
   const diff = eventDate - now
   const daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24))
   const hoursLeft = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
@@ -130,6 +131,11 @@ export default function EventDetailPage() {
                     <p className="text-sm font-bold text-white">
                       {eventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
+                    {eventEndDate && eventEndDate.toDateString() !== eventDate.toDateString() && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        → {eventEndDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-4">
@@ -140,6 +146,7 @@ export default function EventDetailPage() {
                     <p className="text-xs text-gray-500 uppercase tracking-wider">Heure</p>
                     <p className="text-sm font-bold text-white">
                       {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      {eventEndDate && ` → ${eventEndDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
                     </p>
                   </div>
                 </div>

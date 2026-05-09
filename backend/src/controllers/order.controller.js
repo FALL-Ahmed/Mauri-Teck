@@ -78,7 +78,7 @@ exports.trackOrder = async (req, res) => {
 exports.myOrders = async (req, res) => {
   try {
     const orders = await prisma.order.findMany({
-      where: { userId: req.user.id },
+      where: { OR: [{ userId: req.user.id }, { guestPhone: req.user.phone }] },
       include: {
         event: { select: { title: true, date: true, location: true, image: true, city: true } },
         items: { include: { ticketType: true, tickets: true } }
