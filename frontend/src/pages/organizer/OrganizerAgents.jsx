@@ -7,7 +7,7 @@ export default function OrganizerAgents() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' })
+  const [form, setForm] = useState({ name: '', phone: '', password: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [assignModal, setAssignModal] = useState(null)
@@ -31,7 +31,7 @@ export default function OrganizerAgents() {
     try {
       await api.post('/users/agents', form)
       setShowForm(false)
-      setForm({ name: '', email: '', password: '', phone: '' })
+      setForm({ name: '', phone: '', password: '' })
       fetchAgents()
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la création')
@@ -80,7 +80,7 @@ export default function OrganizerAgents() {
                 </div>
                 <div>
                   <p className="font-bold text-white">{agent.user?.name}</p>
-                  <p className="text-xs text-gray-500">{agent.user?.email}</p>
+                  <p className="text-xs text-gray-500">{agent.user?.phone}</p>
                 </div>
               </div>
 
@@ -106,7 +106,6 @@ export default function OrganizerAgents() {
         </div>
       )}
 
-      {/* Create agent modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#111] border border-white/10 rounded-3xl p-6 w-full max-w-md">
@@ -115,8 +114,7 @@ export default function OrganizerAgents() {
             <form onSubmit={handleCreate} className="space-y-4">
               {[
                 { label: 'Nom complet', field: 'name', type: 'text', required: true },
-                { label: 'Email', field: 'email', type: 'email', required: true },
-                { label: 'Téléphone', field: 'phone', type: 'tel', required: false },
+                { label: 'Téléphone', field: 'phone', type: 'tel', required: true },
                 { label: 'Mot de passe', field: 'password', type: 'password', required: true },
               ].map(({ label, field, type, required }) => (
                 <div key={field}>
@@ -136,7 +134,6 @@ export default function OrganizerAgents() {
         </div>
       )}
 
-      {/* Assign modal */}
       {assignModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#111] border border-white/10 rounded-3xl p-6 w-full max-w-md">
