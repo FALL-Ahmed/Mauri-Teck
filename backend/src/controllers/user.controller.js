@@ -5,14 +5,14 @@ const prisma = new PrismaClient();
 // ADMIN → Créer un organisateur
 exports.createOrganizer = async (req, res) => {
   try {
-    const { email, password, name, phone, companyName, description } = req.body;
-    if (await prisma.user.findUnique({ where: { email } }))
-      return res.status(400).json({ success: false, message: 'Email déjà utilisé' });
-
+    const { password, name, phone, companyName, description } = req.body;
+    if (!phone) return res.status(400).json({ success: false, message: 'Numéro de téléphone requis' });
+    if (await prisma.user.findUnique({ where: { phone } }))
+      return res.status(400).json({ success: false, message: 'Ce numéro de téléphone est déjà utilisé' });
     const logo = req.file ? req.file.path : null;
     const user = await prisma.user.create({
       data: {
-        email, name, phone, role: 'ORGANIZER', createdBy: req.user.id,
+        name, phone, role: 'ORGANIZER', createdBy: req.user.id,
         password: await bcrypt.hash(password, 12),
         organizer: { create: { companyName, description, logo } }
       },
@@ -29,13 +29,13 @@ exports.createOrganizer = async (req, res) => {
 // ORGANIZER → Créer un agent
 exports.createAgent = async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
-    if (await prisma.user.findUnique({ where: { email } }))
-      return res.status(400).json({ success: false, message: 'Email déjà utilisé' });
-
+    const { password, name, phone } = req.body;
+    if (!phone) return res.status(400).json({ success: false, message: 'Numéro de téléphone requis' });
+    if (await prisma.user.findUnique({ where: { phone } }))
+      return res.status(400).json({ success: false, message: 'Ce numéro de téléphone est déjà utilisé' });
     const user = await prisma.user.create({
       data: {
-        email, name, phone, role: 'AGENT', createdBy: req.user.id,
+        name, phone, role: 'AGENT', createdBy: req.user.id,
         password: await bcrypt.hash(password, 12),
         agent: { create: { organizerId: req.user.organizer.id } }
       },
@@ -55,7 +55,7 @@ exports.getAllUsers = async (req, res) => {
     const users = await prisma.user.findMany({
       where: role ? { role } : {},
       select: {
-        id: true, email: true, name: true, phone: true, role: true, isActive: true, createdAt: true,
+        id: true, name: true, phone: true, role: true, isActive: true, createdAt: true,
         organizer: { select: { companyName: true, logo: true, isVerified: true } },
         agent: { select: { organizer: { select: { companyName: true } } } }
       },
@@ -73,7 +73,7 @@ exports.getMyAgents = async (req, res) => {
     const agents = await prisma.agent.findMany({
       where: { organizerId: req.user.organizer.id },
       include: {
-        user: { select: { id: true, email: true, name: true, phone: true, isActive: true, createdAt: true } },
+        user: { select: { id: true, name: true, phone: true, isActive: true, createdAt: true } },
         eventAgents: { include: { event: { select: { id: true, title: true, date: true, status: true } } } }
       }
     });
