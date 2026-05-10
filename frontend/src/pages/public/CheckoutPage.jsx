@@ -13,7 +13,7 @@ const PAYMENT_METHODS = [
     label: 'Masrivi',
     logo: '/Masrivi.png',
     color: '#00A651',
-    number: '+222 42212334',
+    number: '+222 41070318',
     desc: 'Envoyez le montant sur ce numéro Masrivi puis uploadez le reçu'
   },
   {
@@ -21,7 +21,7 @@ const PAYMENT_METHODS = [
     label: 'Bankily',
     logo: '/Bankily.png',
     color: '#F7A800',
-    number: '+222 22212334',
+    number: '+222 49377834',
     desc: 'Envoyez le montant sur ce numéro Bankily puis uploadez le reçu'
   },
   {
@@ -29,7 +29,7 @@ const PAYMENT_METHODS = [
     label: 'Sedad',
     logo: '/sedad.png',
     color: '#E63946',
-    number: '+222 32212334',
+    number: '+222 41070318',
     desc: 'Envoyez le montant sur ce numéro Sedad puis uploadez le reçu'
   }
 ]
