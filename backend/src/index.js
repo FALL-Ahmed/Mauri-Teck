@@ -20,6 +20,7 @@ app.use('/api/auth',       require('./routes/auth.routes'));
 app.use('/api/users',      require('./routes/user.routes'));
 app.use('/api/events',     require('./routes/event.routes'));
 app.use('/api/orders',     require('./routes/order.routes'));
+app.use('/api/guest-tickets', require('./routes/guestTicket.routes'));
 app.use('/api/tickets',    require('./routes/ticket.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/stats',      require('./routes/stats.routes'));

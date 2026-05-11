@@ -88,6 +88,7 @@ model Event {
   ticketTypes TicketType[]
   eventAgents EventAgent[]
   orders      Order[]
+  guestTickets GuestTicket[]
 
   @@map("events")
 }
@@ -200,4 +201,22 @@ enum TicketStatus {
   ACTIVE
   USED
   CANCELLED
+}
+model GuestTicket {
+  id           String       @id @default(uuid())
+  ticketNumber String       @unique
+  guestName    String
+  guestEmail   String?
+  guestPhone   String?
+  guestPhoto   String?
+  eventId      String
+  qrCode       String?      @db.Text
+  status       TicketStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  scannedAt    DateTime?
+  scannedBy    String?
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("guest_tickets")
 }
