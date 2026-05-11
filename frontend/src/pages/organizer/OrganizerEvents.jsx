@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Calendar, MapPin, Users, Edit, Eye, Send } from 'lucide-react'
+import { Plus, Calendar, MapPin, Users, Edit, Eye, Send, UserCheck } from 'lucide-react'
 import api, { BASE_URL } from '../../utils/api'
 
 const STATUS = {
@@ -103,6 +103,7 @@ export default function OrganizerEvents() {
                       <Send className="w-3.5 h-3.5" />Publier
                     </button>
                   )}
+                  <Link to={`/organisateur/invites/${event.id}`} className="flex items-center gap-1.5 text-xs font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 px-3 py-2 rounded-lg transition-colors"><UserCheck className="w-3.5 h-3.5" />Invités</Link>
                   <Link to={`/events/${event.id}`} target="_blank" className="flex items-center gap-1.5 text-xs font-medium bg-sahara-500/10 hover:bg-sahara-500/20 text-sahara-400 px-3 py-2 rounded-lg transition-colors">
                     <Eye className="w-3.5 h-3.5" />Voir public
                   </Link>

@@ -25,6 +25,7 @@ import OrganizerDashboard from './pages/organizer/OrganizerDashboard'
 import OrganizerEvents from './pages/organizer/OrganizerEvents'
 import OrganizerEventForm from './pages/organizer/OrganizerEventForm'
 import OrganizerOrders from './pages/organizer/OrganizerOrders'
+import OrganizerGuestTickets from './pages/organizer/OrganizerGuestTickets'
 import OrganizerAgents from './pages/organizer/OrganizerAgents'
 
 import AgentLayout from './pages/agent/AgentLayout'
@@ -69,6 +70,7 @@ export default function App() {
             <Route path="evenements/nouveau" element={<OrganizerEventForm />} />
             <Route path="evenements/:id/modifier" element={<OrganizerEventForm />} />
             <Route path="commandes" element={<OrganizerOrders />} />
+            <Route path="invites/:eventId" element={<OrganizerGuestTickets />} />
             <Route path="agents" element={<OrganizerAgents />} />
           </Route>
 
