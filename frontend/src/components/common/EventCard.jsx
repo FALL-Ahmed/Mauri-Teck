@@ -23,10 +23,10 @@ export default function EventCard({ event }) {
   return (
     <Link to={`/events/${event.id}`} className="group block">
       <div className="relative rounded-3xl overflow-hidden bg-[#111] border border-white/5 hover:border-sahara-400/40 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-sahara-400/10">
-        <div className="relative h-64 overflow-hidden">
+        <div className="relative overflow-hidden">
           {imgSrc ? (
             <img src={imgSrc} alt={event.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              className="w-full" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center"
               style={{ background: `linear-gradient(135deg, ${event.category?.color || '#D4A853'}22, #080808)` }}>
