@@ -41,7 +41,7 @@ export default function AdminDashboard() {
         <StatCard icon={CalendarDays} label="Événements" value={stats?.totalEvents} color="bg-blue-500/20 text-blue-400" />
         <StatCard icon={Users} label="Organisateurs" value={stats?.totalOrganizers} color="bg-purple-500/20 text-purple-400" />
         <StatCard icon={Users} label="Agents" value={stats?.totalAgents} color="bg-cyan-500/20 text-cyan-400" />
-        <StatCard icon={ShoppingBag} label="Commandes confirmées" value={stats?.totalOrders} color="bg-green-500/20 text-green-400" />
+        <StatCard icon={ShoppingBag} label="Commandes confirmées" value={stats?.confirmedOrders} color="bg-green-500/20 text-green-400" />
         <StatCard icon={Ticket} label="Tickets émis" value={stats?.totalTickets} color="bg-sahara-500/20 text-sahara-400" />
         <StatCard icon={TrendingUp} label="Revenus totaux" value={stats?.totalRevenue ? `${stats.totalRevenue.toLocaleString()} MRU` : '0 MRU'} color="bg-emerald-500/20 text-emerald-400" />
       </div>

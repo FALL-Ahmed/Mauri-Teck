@@ -23,7 +23,16 @@ exports.admin = async (req, res) => {
     ]);
     res.json({
       success: true,
-      stats: { events, organizers, agents, confirmedOrders: orders, totalTickets: tickets, totalRevenue: revenue._sum.totalAmount || 0, recentOrders, topEvents }
+      stats: {
+        totalEvents: events,
+        totalOrganizers: organizers,
+        totalAgents: agents,
+        confirmedOrders: orders,
+        totalTickets: tickets,
+        totalRevenue: revenue._sum.totalAmount || 0,
+        recentOrders,
+        topEvents
+      }
     });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }
 };
@@ -39,14 +48,21 @@ exports.organizer = async (req, res) => {
       prisma.order.count({ where: { event: { organizerId: orgId }, status: 'PAYMENT_UPLOADED' } }),
       prisma.event.findMany({
         where: { organizerId: orgId },
-        include: { ticketTypes: true, _count: { select: { orders: true } } },
+        include: { ticketTypes: true, orders: { include: { items: true } }, _count: { select: { orders: true } } },
         orderBy: { date: 'asc' },
         take: 10
       })
     ]);
     res.json({
       success: true,
-      stats: { totalEvents: events, confirmedOrders: orders, totalRevenue: revenue._sum.totalAmount || 0, ticketsSold, pendingPayments, eventDetails }
+      stats: {
+        totalEvents: events,
+        confirmedOrders: orders,
+        totalRevenue: revenue._sum.totalAmount || 0,
+        ticketsSold,
+        pendingPayments,
+        eventStats: eventDetails
+      }
     });
-  } catch { res.status(500).json({ success: false, message: 'Erreur serveur' }); }
+  } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }
 };

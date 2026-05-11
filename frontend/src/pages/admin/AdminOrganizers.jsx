@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import api, { BASE_URL } from '../../utils/api'
 
 export default function AdminOrganizers() {
   const [organizers, setOrganizers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', companyName: '', description: '' })
+  const [form, setForm] = useState({ name: '', phone: '', password: '', companyName: '', description: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
@@ -27,7 +27,7 @@ export default function AdminOrganizers() {
     try {
       await api.post('/users/organizers', form)
       setShowForm(false)
-      setForm({ name: '', email: '', password: '', phone: '', companyName: '', description: '' })
+      setForm({ name: '', phone: '', password: '', companyName: '', description: '' })
       fetchOrganizers()
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la création')
@@ -40,8 +40,8 @@ export default function AdminOrganizers() {
   }
 
   const filtered = organizers.filter(o =>
-    o.name.toLowerCase().includes(search.toLowerCase()) ||
-    o.email.toLowerCase().includes(search.toLowerCase()) ||
+    o.name?.toLowerCase().includes(search.toLowerCase()) ||
+    o.phone?.toLowerCase().includes(search.toLowerCase()) ||
     o.organizer?.companyName?.toLowerCase().includes(search.toLowerCase())
   )
 
@@ -57,14 +57,12 @@ export default function AdminOrganizers() {
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
           className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-sahara-400 transition-all" />
       </div>
 
-      {/* Table */}
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-sahara-400 border-t-transparent rounded-full animate-spin" /></div>
@@ -77,7 +75,7 @@ export default function AdminOrganizers() {
                 <tr className="border-b border-white/10 text-xs text-gray-500 uppercase tracking-wider">
                   <th className="text-left px-5 py-3">Organisateur</th>
                   <th className="text-left px-5 py-3">Entreprise</th>
-                  <th className="text-left px-5 py-3">Contact</th>
+                  <th className="text-left px-5 py-3">Téléphone</th>
                   <th className="text-left px-5 py-3">Statut</th>
                   <th className="text-left px-5 py-3">Actions</th>
                 </tr>
@@ -88,15 +86,15 @@ export default function AdminOrganizers() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         {org.organizer?.logo ? (
-                          <img src={`${BASE_URL}${org.organizer.logo}`} className="w-9 h-9 rounded-lg object-cover" />
+                          <img src={org.organizer.logo.startsWith('http') ? org.organizer.logo : `${BASE_URL}${org.organizer.logo}`} className="w-9 h-9 rounded-lg object-cover" />
                         ) : (
                           <div className="w-9 h-9 bg-sahara-500/20 rounded-lg flex items-center justify-center text-sahara-400 font-bold text-sm">
-                            {org.name[0]}
+                            {org.name?.[0]}
                           </div>
                         )}
                         <div>
                           <p className="text-sm font-medium text-white">{org.name}</p>
-                          <p className="text-xs text-gray-500">{org.email}</p>
+                          <p className="text-xs text-gray-500">{org.phone || '—'}</p>
                         </div>
                       </div>
                     </td>
@@ -120,7 +118,6 @@ export default function AdminOrganizers() {
         )}
       </div>
 
-      {/* Create modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#111] border border-white/10 rounded-3xl p-6 w-full max-w-lg">
@@ -135,14 +132,10 @@ export default function AdminOrganizers() {
                 </div>
                 <div>
                   <label className="text-xs text-gray-400 font-medium block mb-1.5">Téléphone</label>
-                  <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
+                  <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
+                    placeholder="+222 XX XX XX XX"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-sahara-400 transition-all" />
                 </div>
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 font-medium block mb-1.5">Email</label>
-                <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-sahara-400 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-gray-400 font-medium block mb-1.5">Mot de passe</label>
