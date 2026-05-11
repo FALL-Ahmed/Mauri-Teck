@@ -134,7 +134,7 @@ export default function EventDetailPage() {
                     <p className="text-sm font-bold text-white">
                       {fmtDate(displayDate, { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
-                    {eventEndDate && fmtDate(eventEndDate, {}) !== fmtDate(eventDate, {}) && (
+                    {eventEndDate && fmtDate(eventEndDate, { day: 'numeric', month: 'long', year: 'numeric' }) !== fmtDate(displayDate, { day: 'numeric', month: 'long', year: 'numeric' }) && (
                       <p className="text-xs text-gray-400 mt-0.5">
                         → {fmtDate(eventEndDate, { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
@@ -149,7 +149,7 @@ export default function EventDetailPage() {
                     <p className="text-xs text-gray-500 uppercase tracking-wider">Heure</p>
                     <p className="text-sm font-bold text-white">
                       {fmtTime(displayDate, { hour: '2-digit', minute: '2-digit' })}
-                      {eventEndDate && ` → ${fmtTime(eventEndDate, { hour: '2-digit', minute: '2-digit' })}`}
+                      {eventEndDate && fmtTime(eventEndDate, { hour: '2-digit', minute: '2-digit' }) !== fmtTime(displayDate, { hour: '2-digit', minute: '2-digit' }) && ` → ${fmtTime(eventEndDate, { hour: '2-digit', minute: '2-digit' })}`}
                     </p>
                   </div>
                 </div>
