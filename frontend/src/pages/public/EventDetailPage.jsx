@@ -45,17 +45,20 @@ export default function EventDetailPage() {
   )
   if (!event) return null
 
+  const TZ = 'Africa/Nouakchott'
   const eventDate = new Date(event.date)
   const eventEndDate = event.endDate ? new Date(event.endDate) : null
+  const displayDate = new Date(event.eventDate || event.endDate || event.date)
   const now = new Date()
   const isEventPassed = now > (eventEndDate || eventDate)
 
   const imgSrc = event.image ? (event.image.startsWith('http') ? event.image : `${BASE}${event.image}`) : null
 
-  // Calcul du temps restant (basé sur la date de début)
-  const diff = eventDate - now
+  const diff = displayDate - now
   const daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24))
   const hoursLeft = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const fmtDate = (d, opts) => d.toLocaleDateString('fr-FR', { ...opts, timeZone: TZ })
+  const fmtTime = (d, opts) => d.toLocaleTimeString('fr-FR', { ...opts, timeZone: TZ })
 
   return (
     <div className="min-h-screen bg-[#080808] text-white">
@@ -75,7 +78,7 @@ export default function EventDetailPage() {
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div>
               <p className="font-bold">Cet événement est terminé</p>
-              <p className="text-sm text-red-400/70">La vente de tickets est clôturée depuis le {eventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} à {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-sm text-red-400/70">La vente de tickets est clôturée depuis le {fmtDate(displayDate, { day: 'numeric', month: 'long', year: 'numeric' })} à {fmtTime(displayDate, { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
         )}
@@ -88,7 +91,7 @@ export default function EventDetailPage() {
             {/* IMAGE */}
             <div className="rounded-3xl overflow-hidden bg-[#111] border border-white/10 relative">
               {imgSrc ? (
-                <img src={imgSrc} alt={event.title} className="w-full h-72 sm:h-96 object-cover" />
+                <img src={imgSrc} alt={event.title} className="w-full object-contain" />
               ) : (
                 <div className="w-full h-72 sm:h-96 flex items-center justify-center"
                   style={{ background: `linear-gradient(135deg, ${event.category?.color || '#D4A853'}22, #111)` }}>
@@ -129,11 +132,11 @@ export default function EventDetailPage() {
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wider">Date</p>
                     <p className="text-sm font-bold text-white">
-                      {eventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {fmtDate(displayDate, { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
-                    {eventEndDate && eventEndDate.toDateString() !== eventDate.toDateString() && (
+                    {eventEndDate && fmtDate(eventEndDate, {}) !== fmtDate(eventDate, {}) && (
                       <p className="text-xs text-gray-400 mt-0.5">
-                        → {eventEndDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        → {fmtDate(eventEndDate, { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
                     )}
                   </div>
@@ -145,8 +148,8 @@ export default function EventDetailPage() {
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wider">Heure</p>
                     <p className="text-sm font-bold text-white">
-                      {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                      {eventEndDate && ` → ${eventEndDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
+                      {fmtTime(displayDate, { hour: '2-digit', minute: '2-digit' })}
+                      {eventEndDate && ` → ${fmtTime(eventEndDate, { hour: '2-digit', minute: '2-digit' })}`}
                     </p>
                   </div>
                 </div>
@@ -200,7 +203,7 @@ export default function EventDetailPage() {
                     <p className="text-gray-400 text-sm">
                       La vente de tickets pour cet événement est terminée depuis le<br/>
                       <span className="text-red-400 font-bold">
-                        {eventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} à {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        {fmtDate(displayDate, { day: 'numeric', month: 'long' })} à {fmtTime(displayDate, { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </p>
                     <div className="mt-6 border-t border-white/10 pt-6">

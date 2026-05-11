@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Plus, Trash2, Download, Users, QrCode } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Download, Users, QrCode, Camera } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import api from '../../utils/api'
 
@@ -12,6 +12,9 @@ export default function OrganizerGuestTickets() {
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ guestName: '', guestPhone: '' })
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
+  const fileInputRef = useRef()
 
   useEffect(() => { fetchData() }, [eventId])
 
@@ -28,13 +31,27 @@ export default function OrganizerGuestTickets() {
     finally { setLoading(false) }
   }
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
   const handleCreate = async (e) => {
     e.preventDefault()
     if (!form.guestName) return
     setCreating(true)
     try {
-      await api.post('/guest-tickets', { eventId, guestName: form.guestName, guestPhone: form.guestPhone })
+      const fd = new FormData()
+      fd.append('eventId', eventId)
+      fd.append('guestName', form.guestName)
+      fd.append('guestPhone', form.guestPhone)
+      if (photoFile) fd.append('guestPhoto', photoFile)
+      await api.post('/guest-tickets', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       setForm({ guestName: '', guestPhone: '' })
+      setPhotoFile(null)
+      setPhotoPreview(null)
       setShowForm(false)
       fetchData()
     } catch (e) { console.error(e) }
@@ -47,11 +64,16 @@ export default function OrganizerGuestTickets() {
     catch (e) { console.error(e) }
   }
 
+  const initials = (name) => name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+
   const downloadTicket = async (ticket) => {
     const eventDate = new Date(event.date).toLocaleDateString('fr-FR', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
     })
-    const initials = ticket.guestName.split(' ').map(function(n) { return n[0] }).join('').slice(0, 2).toUpperCase()
+
+    const avatarHtml = ticket.guestPhoto
+      ? `<img src="${ticket.guestPhoto}" crossorigin="anonymous" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #C9A84C;flex-shrink:0;"/>`
+      : `<div style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#1a0800,#2d1500);border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:36px;font-weight:700;color:#C9A84C;">${initials(ticket.guestName)}</span></div>`
 
     const div = document.createElement('div')
     div.style.cssText = 'position:fixed;left:-9999px;top:0;width:440px;font-family:Georgia,serif;background:#0d0d0d;border-radius:28px;overflow:hidden;'
@@ -61,9 +83,7 @@ export default function OrganizerGuestTickets() {
       + '<div style="position:absolute;top:16px;right:20px;font-size:28px;opacity:0.25;">✦</div>'
       + '</div>'
       + '<div style="padding:32px;display:flex;align-items:center;gap:24px;border-bottom:1px solid rgba(201,168,76,0.15);">'
-      + '<div style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#1a0800,#2d1500);border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
-      + '<span style="font-size:36px;font-weight:700;color:#C9A84C;">' + initials + '</span>'
-      + '</div>'
+      + avatarHtml
       + '<div>'
       + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:4px 10px;border-radius:20px;display:inline-block;">✦ Invité d\'honneur</div>'
       + '<div style="font-size:22px;font-weight:700;color:#F5F0E8;margin-bottom:8px;">' + ticket.guestName + '</div>'
@@ -138,9 +158,25 @@ export default function OrganizerGuestTickets() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-night-800 border border-white/10 rounded-2xl p-6 w-full max-w-md">
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 w-full max-w-md">
             <h2 className="text-lg font-black text-white mb-6">Nouvel invité</h2>
             <form onSubmit={handleCreate} className="space-y-4">
+
+              {/* Photo upload */}
+              <div className="flex flex-col items-center gap-3">
+                <div
+                  onClick={() => fileInputRef.current.click()}
+                  className="w-24 h-24 rounded-full border-2 border-dashed border-sahara-400/40 hover:border-sahara-400 flex items-center justify-center cursor-pointer overflow-hidden transition-all bg-white/5"
+                >
+                  {photoPreview
+                    ? <img src={photoPreview} className="w-full h-full object-cover"/>
+                    : <Camera className="w-8 h-8 text-sahara-400/50"/>
+                  }
+                </div>
+                <p className="text-xs text-gray-500">Photo (optionnelle) — cliquer pour choisir</p>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange}/>
+              </div>
+
               <div>
                 <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wider">Nom complet *</label>
                 <input value={form.guestName} onChange={e => setForm({...form, guestName: e.target.value})}
@@ -154,7 +190,7 @@ export default function OrganizerGuestTickets() {
                   placeholder="+222 XX XX XX XX"/>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)}
+                <button type="button" onClick={() => { setShowForm(false); setPhotoFile(null); setPhotoPreview(null) }}
                   className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 font-bold py-3 rounded-xl transition-all">
                   Annuler
                 </button>
@@ -178,8 +214,11 @@ export default function OrganizerGuestTickets() {
         <div className="grid gap-4">
           {tickets.map(ticket => (
             <div key={ticket.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sahara-600 to-sahara-900 border-2 border-sahara-400/40 flex-shrink-0 flex items-center justify-center">
-                <span className="text-lg font-bold text-sahara-300">{ticket.guestName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}</span>
+              <div className="w-14 h-14 rounded-full border-2 border-sahara-400/40 flex-shrink-0 overflow-hidden bg-gradient-to-br from-sahara-600 to-sahara-900 flex items-center justify-center">
+                {ticket.guestPhoto
+                  ? <img src={ticket.guestPhoto} className="w-full h-full object-cover"/>
+                  : <span className="text-lg font-bold text-sahara-300">{initials(ticket.guestName)}</span>
+                }
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-white">{ticket.guestName}</div>

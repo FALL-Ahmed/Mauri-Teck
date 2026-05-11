@@ -73,6 +73,7 @@ model Event {
   description String
   date        DateTime
   endDate     DateTime?
+  eventDate   DateTime?
   location    String
   address     String?
   city        String

@@ -11,10 +11,11 @@ export default function EventCard({ event }) {
   const isSoldOut     = totalSeats === 0 && totalAllSeats > 0
   const isAlmostFull  = soldPct >= 80 && !isSoldOut
 
-  const eventDate = new Date(event.date)
-  const day   = eventDate.toLocaleDateString('fr-FR', { day: '2-digit' })
-  const month = eventDate.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase()
-  const time  = eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  const displayDate = new Date(event.eventDate || event.endDate || event.date)
+  const TZ = 'Africa/Nouakchott'
+  const day   = displayDate.toLocaleDateString('fr-FR', { day: '2-digit', timeZone: TZ })
+  const month = displayDate.toLocaleDateString('fr-FR', { month: 'short', timeZone: TZ }).toUpperCase()
+  const time  = displayDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: TZ })
 
   const BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000' : `http://${window.location.hostname}:5000`
   const imgSrc = event.image ? (event.image.startsWith('http') ? event.image : `${BASE}${event.image}`) : null
@@ -38,8 +39,8 @@ export default function EventCard({ event }) {
             <div className="text-xs font-bold text-sahara-400 mt-0.5">{month}</div>
           </div>
           <div className="absolute top-4 right-4">
-            <span className="text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-md border"
-              style={{ background: `${event.category?.color || '#D4A853'}30`, color: event.category?.color || '#D4A853', borderColor: `${event.category?.color || '#D4A853'}50` }}>
+            <span className="text-xs font-bold px-3 py-1.5 rounded-full border bg-black/70 backdrop-blur-md"
+              style={{ color: event.category?.color || '#D4A853', borderColor: event.category?.color || '#D4A853' }}>
               {event.category?.icon} {event.category?.name}
             </span>
           </div>

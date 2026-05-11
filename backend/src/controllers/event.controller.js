@@ -62,7 +62,7 @@ exports.getMyEvents = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { title, description, date, endDate, location, address, city, categoryId, ticketTypes } = req.body;
+    const { title, description, date, endDate, eventDate, location, address, city, categoryId, ticketTypes } = req.body;
     if (endDate && new Date(endDate) <= new Date(date))
       return res.status(400).json({ success: false, message: 'La date de fin doit être après la date de début' });
     const image = req.file ? req.file.path : null;
@@ -72,6 +72,7 @@ exports.create = async (req, res) => {
       data: {
         title, description, date: new Date(date),
         endDate: endDate ? new Date(endDate) : null,
+        eventDate: eventDate ? new Date(eventDate) : null,
         location, address, city, categoryId, image,
         organizerId: req.user.organizer.id,
         ticketTypes: {
@@ -96,12 +97,12 @@ exports.update = async (req, res) => {
     const ev = await prisma.event.findFirst({ where: { id: req.params.id, organizerId: req.user.organizer.id } });
     if (!ev) return res.status(404).json({ success: false, message: 'Événement introuvable' });
     const image = req.file ? req.file.path : ev.image;
-    const { title, description, date, endDate, location, address, city, categoryId, status } = req.body;
+    const { title, description, date, endDate, eventDate, location, address, city, categoryId, status } = req.body;
     if (endDate && new Date(endDate) <= new Date(date))
       return res.status(400).json({ success: false, message: 'La date de fin doit être après la date de début' });
     const updated = await prisma.event.update({
       where: { id: req.params.id },
-      data: { title, description, date: new Date(date), endDate: endDate ? new Date(endDate) : null, location, address, city, categoryId, status, image },
+      data: { title, description, date: new Date(date), endDate: endDate ? new Date(endDate) : null, eventDate: eventDate ? new Date(eventDate) : null, location, address, city, categoryId, status, image },
       include: { ticketTypes: true, category: true }
     });
     res.json({ success: true, event: updated });

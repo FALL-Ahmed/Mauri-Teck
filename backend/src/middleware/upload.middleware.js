@@ -20,3 +20,4 @@ const storage = (folder) => new CloudinaryStorage({
 exports.uploadEventImage   = multer({ storage: storage('events'),   limits: { fileSize: 5e6 } }).single('image');
 exports.uploadPaymentProof = multer({ storage: storage('receipts'), limits: { fileSize: 5e6 } }).single('paymentProof');
 exports.uploadLogo         = multer({ storage: storage('logos'),    limits: { fileSize: 2e6 } }).single('logo');
+exports.uploadGuestPhoto   = multer({ storage: storage('guests'),   limits: { fileSize: 3e6 } }).single('guestPhoto');

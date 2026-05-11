@@ -11,7 +11,7 @@ export default function OrganizerEventForm() {
   const isEdit = !!id
 
   const [form, setForm] = useState({
-    title: '', description: '', date: '', endDate: '', location: '',
+    title: '', description: '', date: '', endDate: '', eventDate: '', location: '',
     address: '', city: '', categoryId: ''
   })
   const [ticketTypes, setTicketTypes] = useState([{ ...emptyTicket }])
@@ -28,7 +28,7 @@ export default function OrganizerEventForm() {
         const e = r.data.event
         setForm({
           title: e.title, description: e.description,
-          date: e.date?.slice(0, 16), endDate: e.endDate?.slice(0, 16) || '',
+          date: e.date?.slice(0, 16), endDate: e.endDate?.slice(0, 16) || '', eventDate: e.eventDate?.slice(0, 16) || '',
           location: e.location, address: e.address || '', city: e.city, categoryId: e.categoryId
         })
         setTicketTypes(e.ticketTypes.map(t => ({ ...t, price: t.price.toString(), totalSeats: t.totalSeats.toString() })))
@@ -136,14 +136,20 @@ export default function OrganizerEventForm() {
               {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
             </select>
           </div>
+          <div>
+            <label className="text-xs text-gray-400 font-medium block mb-1.5">Date exacte de l'événement *</label>
+            <input required type="datetime-local" value={form.eventDate} onChange={e => setForm({...form, eventDate: e.target.value})}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sahara-400 transition-all text-sm" />
+            <p className="text-xs text-gray-600 mt-1">Date et heure affichées sur la carte de l'événement</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-gray-400 font-medium block mb-1.5">Date de début *</label>
+              <label className="text-xs text-gray-400 font-medium block mb-1.5">Date de début de la période</label>
               <input required type="datetime-local" value={form.date} onChange={e => setForm({...form, date: e.target.value})}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sahara-400 transition-all text-sm" />
             </div>
             <div>
-              <label className="text-xs text-gray-400 font-medium block mb-1.5">Date de fin</label>
+              <label className="text-xs text-gray-400 font-medium block mb-1.5">Date de fin de la période</label>
               <input type="datetime-local" value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sahara-400 transition-all text-sm" />
             </div>

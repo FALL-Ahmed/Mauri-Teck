@@ -11,8 +11,9 @@ exports.createGuestTicket = async (req, res) => {
     const qrData = JSON.stringify({ type: 'GUEST', ticketNumber, eventId })
     const qrCode = await QRCode.toDataURL(qrData)
 
+    const guestPhoto = req.file ? req.file.path : null
     const ticket = await prisma.guestTicket.create({
-      data: { eventId, guestName, guestPhone, ticketNumber, qrCode }
+      data: { eventId, guestName, guestPhone, guestPhoto, ticketNumber, qrCode }
     })
     res.json({ ticket })
   } catch (e) { console.error('GUEST TICKET ERROR:', e); res.status(500).json({ message: e.message }) }
