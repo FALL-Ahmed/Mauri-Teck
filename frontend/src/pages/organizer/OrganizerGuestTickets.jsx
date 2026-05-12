@@ -67,7 +67,7 @@ export default function OrganizerGuestTickets() {
   const initials = (name) => name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 
   const downloadTicket = async (ticket) => {
-    const eventDate = new Date(event.date).toLocaleDateString('fr-FR', {
+    const eventDate = new Date(event.eventDate || event.endDate || event.date).toLocaleDateString('fr-FR', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
     })
 
