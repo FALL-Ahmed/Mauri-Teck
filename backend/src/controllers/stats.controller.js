@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 exports.admin = async (req, res) => {
   try {
-    const [events, organizers, agents, orders, tickets, revenue, recentOrders, topEvents] = await Promise.all([
+    const [events, organizers, agents, orders, tickets, revenue, recentOrders, topEvents, paymentStats] = await Promise.all([
       prisma.event.count(),
       prisma.user.count({ where: { role: 'ORGANIZER' } }),
       prisma.user.count({ where: { role: 'AGENT' } }),
@@ -19,8 +19,16 @@ exports.admin = async (req, res) => {
         take: 5, where: { status: 'PUBLISHED' },
         include: { organizer: { select: { companyName: true } }, _count: { select: { orders: true } } },
         orderBy: { orders: { _count: 'desc' } }
+      }),
+      // Stats par méthode de paiement
+      prisma.order.groupBy({
+        by: ['paymentMethod'],
+        where: { status: 'CONFIRMED', paymentMethod: { not: null } },
+        _count: { id: true },
+        _sum: { totalAmount: true }
       })
     ]);
+
     res.json({
       success: true,
       stats: {
@@ -31,7 +39,8 @@ exports.admin = async (req, res) => {
         totalTickets: tickets,
         totalRevenue: revenue._sum.totalAmount || 0,
         recentOrders,
-        topEvents
+        topEvents,
+        paymentStats
       }
     });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }
@@ -40,7 +49,7 @@ exports.admin = async (req, res) => {
 exports.organizer = async (req, res) => {
   try {
     const orgId = req.user.organizer.id;
-    const [events, orders, revenue, ticketsSold, pendingPayments, eventDetails] = await Promise.all([
+    const [events, orders, revenue, ticketsSold, pendingPayments, eventDetails, paymentStats] = await Promise.all([
       prisma.event.count({ where: { organizerId: orgId } }),
       prisma.order.count({ where: { event: { organizerId: orgId }, status: 'CONFIRMED' } }),
       prisma.order.aggregate({ where: { event: { organizerId: orgId }, status: 'CONFIRMED' }, _sum: { totalAmount: true } }),
@@ -51,8 +60,20 @@ exports.organizer = async (req, res) => {
         include: { ticketTypes: true, orders: { include: { items: true } }, _count: { select: { orders: true } } },
         orderBy: { date: 'asc' },
         take: 10
+      }),
+      // Stats par méthode de paiement pour l'organisateur
+      prisma.order.groupBy({
+        by: ['paymentMethod'],
+        where: {
+          event: { organizerId: orgId },
+          status: 'CONFIRMED',
+          paymentMethod: { not: null }
+        },
+        _count: { id: true },
+        _sum: { totalAmount: true }
       })
     ]);
+
     res.json({
       success: true,
       stats: {
@@ -61,7 +82,8 @@ exports.organizer = async (req, res) => {
         totalRevenue: revenue._sum.totalAmount || 0,
         ticketsSold,
         pendingPayments,
-        eventStats: eventDetails
+        eventStats: eventDetails,
+        paymentStats
       }
     });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }
