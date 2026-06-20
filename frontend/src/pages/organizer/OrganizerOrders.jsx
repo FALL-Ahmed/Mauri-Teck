@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, Eye, Clock, XCircle } from 'lucide-react'
+import { CheckCircle, Eye, Clock, XCircle, Ticket } from 'lucide-react'
 import api, { BASE_URL } from '../../utils/api'
 
 const STATUS = {
@@ -7,6 +7,13 @@ const STATUS = {
   PAYMENT_UPLOADED: { label: 'Paiement reçu',    color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
   CONFIRMED:        { label: 'Confirmé ✓',        color: 'bg-green-500/20 text-green-300 border-green-500/30' },
   CANCELLED:        { label: 'Annulé',            color: 'bg-red-500/20 text-red-300 border-red-500/30' },
+}
+
+const TICKET_STATUS = {
+  ACTIVE:    { label: '✅ Actif',    color: 'text-green-400' },
+  USED:      { label: '🔵 Scanné',   color: 'text-blue-400' },
+  CANCELLED: { label: '❌ Annulé',   color: 'text-red-400' },
+  PENDING:   { label: '⏳ En attente', color: 'text-yellow-400' },
 }
 
 export default function OrganizerOrders() {
@@ -17,6 +24,9 @@ export default function OrganizerOrders() {
   const [confirming, setConfirming] = useState(null)
   const [cancelling, setCancelling] = useState(null)
   const [cancelModal, setCancelModal] = useState(null)
+  const [cancelTicketModal, setCancelTicketModal] = useState(null)
+  const [cancellingTicket, setCancellingTicket] = useState(null)
+  const [expandedOrder, setExpandedOrder] = useState(null)
 
   useEffect(() => { fetchOrders() }, [tab])
 
@@ -48,6 +58,18 @@ export default function OrganizerOrders() {
     } finally { setCancelling(null) }
   }
 
+  const handleCancelTicket = async () => {
+    if (!cancelTicketModal) return
+    setCancellingTicket(cancelTicketModal.id)
+    try {
+      await api.patch(`/tickets/${cancelTicketModal.id}/cancel`)
+      setCancelTicketModal(null)
+      fetchOrders()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de l\'annulation du ticket')
+    } finally { setCancellingTicket(null) }
+  }
+
   const TABS = [
     { key: 'PAYMENT_UPLOADED', label: 'Paiements reçus' },
     { key: 'CONFIRMED',        label: 'Confirmées' },
@@ -62,7 +84,6 @@ export default function OrganizerOrders() {
         <p className="text-gray-400 text-sm mt-1">Gérez et validez les paiements</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
@@ -88,6 +109,12 @@ export default function OrganizerOrders() {
           {orders.map(order => {
             const s = STATUS[order.status]
             const canCancel = order.status === 'PENDING' || order.status === 'PAYMENT_UPLOADED'
+            const isExpanded = expandedOrder === order.id
+            // Récupérer tous les tickets de la commande
+            const allTickets = order.items?.flatMap(item =>
+              (item.tickets || []).map(t => ({ ...t, ticketTypeName: item.ticketType?.name }))
+            ) || []
+
             return (
               <div key={order.id} className={`bg-white/5 border rounded-2xl p-5 transition-all ${
                 order.status === 'PAYMENT_UPLOADED' ? 'border-blue-500/30 bg-blue-500/5' : 'border-white/10'
@@ -101,7 +128,6 @@ export default function OrganizerOrders() {
                     <h3 className="text-white font-bold mt-2">{order.event?.title}</h3>
                     <p className="text-xs text-gray-400 mt-1">{new Date(order.event?.date).toLocaleDateString('fr-FR')}</p>
 
-                    {/* Client info */}
                     <div className="mt-3 text-sm text-gray-300">
                       <span className="text-gray-500">Client : </span>
                       {order.guestName || order.user?.name || '—'}
@@ -110,7 +136,6 @@ export default function OrganizerOrders() {
                       )}
                     </div>
 
-                    {/* Items */}
                     <div className="mt-3 space-y-1">
                       {order.items.map(item => (
                         <div key={item.id} className="flex items-center justify-between text-xs bg-white/3 rounded-lg px-3 py-2">
@@ -120,7 +145,7 @@ export default function OrganizerOrders() {
                       ))}
                     </div>
 
-                    <div className="mt-3 flex items-center gap-4">
+                    <div className="mt-3 flex items-center gap-4 flex-wrap">
                       <span className="text-sahara-400 font-bold">{order.totalAmount?.toLocaleString()} MRU</span>
                       <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</span>
                       {order.paymentMethod && (
@@ -129,6 +154,41 @@ export default function OrganizerOrders() {
                         </span>
                       )}
                     </div>
+
+                    {/* Bouton voir tickets si commande confirmée */}
+                    {order.status === 'CONFIRMED' && allTickets.length > 0 && (
+                      <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                        className="mt-3 flex items-center gap-1.5 text-xs text-sahara-400 hover:text-sahara-300 transition-colors">
+                        <Ticket className="w-3.5 h-3.5" />
+                        {isExpanded ? 'Masquer les tickets' : `Voir les tickets (${allTickets.length})`}
+                      </button>
+                    )}
+
+                    {/* Liste des tickets avec bouton annuler */}
+                    {isExpanded && allTickets.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {allTickets.map(ticket => {
+                          const ts = TICKET_STATUS[ticket.status] || TICKET_STATUS.PENDING
+                          return (
+                            <div key={ticket.id} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-3 py-2.5">
+                              <div>
+                                <div className="font-mono text-xs text-sahara-400">{ticket.ticketNumber}</div>
+                                <div className="text-xs text-gray-400 mt-0.5">{ticket.ticketTypeName}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-bold ${ts.color}`}>{ts.label}</span>
+                                {ticket.status === 'ACTIVE' && (
+                                  <button onClick={() => setCancelTicketModal(ticket)}
+                                    className="flex items-center gap-1 text-xs font-bold bg-red-500/20 hover:bg-red-500/40 text-red-400 px-2.5 py-1.5 rounded-lg transition-colors border border-red-500/30">
+                                    <XCircle className="w-3 h-3" /> Annuler
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -160,7 +220,44 @@ export default function OrganizerOrders() {
         </div>
       )}
 
-      {/* Modal confirmation annulation */}
+      {/* Modal annulation ticket individuel */}
+      {cancelTicketModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setCancelTicketModal(null)}>
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <Ticket className="w-6 h-6 text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white">Annuler ce ticket ?</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Le QR code ne sera plus valide</p>
+              </div>
+            </div>
+
+            <div className="bg-white/5 rounded-xl p-4 mb-5">
+              <div className="font-mono text-xs text-sahara-400 mb-1">{cancelTicketModal.ticketNumber}</div>
+              <div className="text-gray-300 text-sm">{cancelTicketModal.ticketTypeName}</div>
+              <div className="mt-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                ⚠️ Ce ticket ne pourra plus être scanné à l'entrée
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setCancelTicketModal(null)}
+                className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 font-bold py-3 rounded-xl transition-all">
+                Retour
+              </button>
+              <button onClick={handleCancelTicket} disabled={!!cancellingTicket}
+                className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50">
+                {cancellingTicket ? 'Annulation...' : '❌ Annuler le ticket'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal annulation commande */}
       {cancelModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setCancelModal(null)}>
@@ -174,20 +271,13 @@ export default function OrganizerOrders() {
                 <p className="text-xs text-gray-400 mt-0.5">Cette action est irréversible</p>
               </div>
             </div>
-
             <div className="bg-white/5 rounded-xl p-4 mb-5">
               <div className="font-mono text-xs text-sahara-400 mb-1">{cancelModal.orderNumber}</div>
               <div className="text-white font-bold">{cancelModal.event?.title}</div>
-              <div className="text-gray-400 text-sm mt-1">
-                {cancelModal.guestName || cancelModal.user?.name || '—'}
-              </div>
+              <div className="text-gray-400 text-sm mt-1">{cancelModal.guestName || cancelModal.user?.name || '—'}</div>
               <div className="text-sahara-400 font-bold mt-2">{cancelModal.totalAmount?.toLocaleString()} MRU</div>
             </div>
-
-            <p className="text-sm text-gray-400 mb-5">
-              Les places seront remises en vente automatiquement. Le client sera notifié de l'annulation.
-            </p>
-
+            <p className="text-sm text-gray-400 mb-5">Les places seront remises en vente automatiquement.</p>
             <div className="flex gap-3">
               <button onClick={() => setCancelModal(null)}
                 className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 font-bold py-3 rounded-xl transition-all">

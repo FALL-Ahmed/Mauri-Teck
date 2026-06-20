@@ -94,3 +94,40 @@ exports.scanHistory = async (req, res) => {
     res.json({ success: true, tickets });
   } catch { res.status(500).json({ success: false, message: 'Erreur serveur' }); }
 };
+
+// ORGANIZER → Annuler un ticket individuel
+exports.cancelTicket = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      include: {
+        orderItem: {
+          include: {
+            order: { include: { event: { include: { organizer: true } } } },
+            ticketType: true
+          }
+        }
+      }
+    });
+    if (!ticket) return res.status(404).json({ success: false, message: 'Ticket introuvable' });
+    if (ticket.orderItem.order.event.organizer.userId !== req.user.id)
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
+    if (ticket.status === 'CANCELLED')
+      return res.status(400).json({ success: false, message: 'Ticket déjà annulé' });
+
+    // Annuler le ticket et remettre la place disponible
+    const [updated] = await Promise.all([
+      prisma.ticket.update({
+        where: { id: ticketId },
+        data: { status: 'CANCELLED' }
+      }),
+      prisma.ticketType.update({
+        where: { id: ticket.orderItem.ticketTypeId },
+        data: { availableSeats: { increment: 1 } }
+      })
+    ]);
+
+    res.json({ success: true, message: '✅ Ticket annulé', ticket: updated });
+  } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }
+};
