@@ -7,7 +7,6 @@ const PAYMENT_CONFIG = {
   sedad:   { emoji: "🔴", label: "Sedad",   color: "bg-red-500/20 text-red-400 border-red-500/30" },
   masrivi: { emoji: '🟢', label: 'Masrivi', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
   bankily: { emoji: '🟡', label: 'Bankily', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-  sedad:   { emoji: '🔴', label: 'Sedad',   color: 'bg-red-500/20 text-red-400 border-red-500/30' },
   default: { emoji: '💳', label: 'Autre',   color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' }
 }
 

@@ -116,7 +116,8 @@ exports.cancelTicket = async (req, res) => {
     if (ticket.status === 'CANCELLED')
       return res.status(400).json({ success: false, message: 'Ticket déjà annulé' });
 
-    // Annuler le ticket et remettre la place disponible
+    // Annuler le ticket, remettre la place et déduire le montant
+    const ticketPrice = ticket.orderItem.unitPrice;
     const [updated] = await Promise.all([
       prisma.ticket.update({
         where: { id: ticketId },
@@ -125,9 +126,12 @@ exports.cancelTicket = async (req, res) => {
       prisma.ticketType.update({
         where: { id: ticket.orderItem.ticketTypeId },
         data: { availableSeats: { increment: 1 } }
+      }),
+      prisma.order.update({
+        where: { id: ticket.orderItem.orderId },
+        data: { totalAmount: { decrement: ticketPrice } }
       })
     ]);
-
-    res.json({ success: true, message: '✅ Ticket annulé', ticket: updated });
+    res.json({ success: true, message: '✅ Ticket annulé', ticket: updated, refundAmount: ticketPrice });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Erreur serveur' }); }
 };
